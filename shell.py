@@ -1,7 +1,7 @@
 import bruh
 
 while True:
-    text = input("bruh > ")
+    text = input("LOLCODE > ")
     if text.strip() == "": continue
     result, error = bruh.run('<stdin>', text)
 

@@ -1,4 +1,4 @@
-#######################################
+######################################
 # IMPORTS
 #######################################
 
@@ -104,52 +104,85 @@ class Position:
 # TOKENS
 #######################################
 
-TT_INT = 'INT'
-TT_FLOAT = 'FLOAT'
-TT_STRING = 'STRING'
-TT_IDENTIFIER = 'IDENTIFIER'
-TT_KEYWORD = 'KEYWORD'
-TT_PLUS = 'PLUS'
-TT_MINUS = 'MINUS'
-TT_MUL = 'MUL'
-TT_DIV = 'DIV'
-TT_POW = 'POW'
-TT_EQ = 'EQ'
-TT_LPAREN = 'LPAREN'
-TT_RPAREN = 'RPAREN'
-TT_LSQUARE = 'LSQUARE'
-TT_RSQUARE = 'RSQUARE'
-TT_EE = 'EE'
-TT_NE = 'NE'
-TT_LT = 'LT'
-TT_GT = 'GT'
-TT_LTE = 'LTE'
-TT_GTE = 'GTE'
-TT_COMMA = 'COMMA'
-TT_ARROW = 'ARROW'
-TT_NEWLINE = 'NEWLINE'
-TT_EOF = 'EOF'
+TT_INT          = 'INT'
+TT_FLOAT        = 'FLOAT'
+TT_STRING       = 'STRING'
+TT_IDENTIFIER   = 'IDENTIFIER'
+TT_KEYWORD      = 'KEYWORD'
+TT_PLUS         = 'PLUS'
+TT_MINUS        = 'MINUS'
+TT_MUL          = 'MUL'
+TT_DIV          = 'DIV'
+TT_POW          = 'POW'
+TT_EQ           = 'EQ'
+TT_LPAREN       = 'LPAREN'
+TT_RPAREN       = 'RPAREN'
+TT_LSQUARE      = 'LSQUARE'
+TT_RSQUARE      = 'RSQUARE'
+TT_EE           = 'EE'
+TT_NE           = 'NE'
+TT_LT           = 'LT'
+TT_GT           = 'GT'
+TT_LTE          = 'LTE'
+TT_GTE          = 'GTE'
+TT_COMMA        = 'COMMA'
+TT_ARROW        = 'ARROW'
+TT_NEWLINE      = 'NEWLINE'
+TT_EOF          = 'EOF'
 
 KEYWORDS = [
-    'VAR',
+    'ITZ',  # variable assignment
+    'I',
+    'HAS',
+    'A',  # I HAS A = VAR. so VAR a = 5 becomes I HAS A a ITZ 5
     'AND',
     'OR',
     'NOT',
-    'IF',
-    'ELIF',
-    'ELSE',
+    'ORLY',  # IF
+    'MEBBE',  # ELIF
+    'NOWAI',  # ELSE
     'FOR',
     'TO',
     'STEP',
     'WHILE',
     'FUN',
-    'THEN',
-    'END',
+    'YARLY',  # THEN (FOR IF)
+    'OIC',  # OIC
     'RETURN',
     'CONTINUE',
     'BREAK',
+    'BTW'  # COMMENT
 ]
+"""
+TO ADD:
+- "IM IN YR LOOP" starts an infinite loop
+- "DOWN <variable>!!<times>" decrements a variable that amount of times.
 
+Operators:
+- "SUM OF <x> AN <y>"       x + y
+- "DIFF OF <x> AN <y>"      x - y
+- "PRODUKT OF <x> AN <y>"   x * y
+- "QUOSHUNT OF <x> AN <y>"  x / y
+- "MOD OF <x> AN <y>"       x % y
+- "BIGGR OF <x> AN <y>"     max(x, y)
+- "SMALLR OF <x> AN <y>"    min(x, y)
+
+Boolean truth operators:
+- "BOTH OF <x> AN <y>"      x and y
+- "EITHER OF <x> AN <y>"    x or y
+- "WON OF <x> AN <y>"       x xor y
+- "NOT <x>"                 !x
+
+Comparison operators:
+- "BOTH SAEM <x> AN <y>"                    x == y 
+- "DIFFRINT <x> AN <y>"                     x != y
+- "BOTH SAEM <x> AN BIGGR OF <x> AN <y>"    x >= y
+- "BOTH SAEM <x> AN SMALLR OF <x> AN <y>"   x <= y
+- "DIFFRINT <x> AN SMALLR OF <x> AN <y>"    x > y
+- "DIFFRINT <x> AN BIGGR OF <x> AN <y>"     x < y
+
+- "VISIBLE" = print
+"""
 
 class Token:
     def __init__(self, type_, value=None, pos_start=None, pos_end=None):
@@ -251,6 +284,7 @@ class Lexer:
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
 
         tokens.append(Token(TT_EOF, pos_start=self.pos))
+        print(tokens)
         return tokens, None
 
     def make_number(self):
@@ -303,6 +337,8 @@ class Lexer:
             id_str += self.current_char
             self.advance()
 
+        print(f"ID String is {id_str}")
+        print(id_str in KEYWORDS)
         tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
         return Token(tok_type, id_str, pos_start, self.pos)
 
@@ -361,7 +397,24 @@ class Lexer:
 
         return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
 
+    def make_identifier_or_skip_comment(self):
+        pos_start = self.pos.copy()
+        self.advance()
+
+        if self.current_char == 'T':
+            self.advance()
+
+            if self.current_char == 'W':
+                self.skip_comment()
+
+            else:
+                return Token(TT_IDENTIFIER, pos_start=pos_start, pos_end=self.pos)
+
+        else:
+            return Token(TT_IDENTIFIER, pos_start=pos_start, pos_end=self.pos)
+
     def skip_comment(self):
+        pos_start = self.pos.copy()
         self.advance()
 
         while self.current_char != '\n':
@@ -673,7 +726,23 @@ class Parser:
     def expr(self):
         res = ParseResult()
 
-        if self.current_tok.matches(TT_KEYWORD, 'VAR'):
+        if self.current_tok.matches(TT_KEYWORD, 'I'):
+            res.register_advancement()
+            self.advance()
+
+            if not self.current_tok.matches(TT_KEYWORD, 'HAS'):
+                return res.failure(InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    f"Expected 'HAS'"
+                ))
+            res.register_advancement()
+            self.advance()
+
+            if not self.current_tok.matches(TT_KEYWORD, 'A'):
+                return res.failure(InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    f"Expected 'A'"
+                ))
             res.register_advancement()
             self.advance()
 
@@ -687,10 +756,10 @@ class Parser:
             res.register_advancement()
             self.advance()
 
-            if self.current_tok.type != TT_EQ:
+            if not self.current_tok.matches(TT_KEYWORD, 'ITZ'):
                 return res.failure(InvalidSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    "Expected '='"
+                    "Expected 'ITZ'"
                 ))
 
             res.register_advancement()
@@ -831,7 +900,7 @@ class Parser:
             if res.error: return res
             return res.success(list_expr)
 
-        elif tok.matches(TT_KEYWORD, 'IF'):
+        elif tok.matches(TT_KEYWORD, 'ORLY'):
             if_expr = res.register(self.if_expr())
             if res.error: return res
             return res.success(if_expr)
@@ -905,19 +974,19 @@ class Parser:
 
     def if_expr(self):
         res = ParseResult()
-        all_cases = res.register(self.if_expr_cases('IF'))
+        all_cases = res.register(self.if_expr_cases('ORLY'))
         if res.error: return res
         cases, else_case = all_cases
         return res.success(IfNode(cases, else_case))
 
     def if_expr_b(self):
-        return self.if_expr_cases('ELIF')
+        return self.if_expr_cases('MEBBE')
 
     def if_expr_c(self):
         res = ParseResult()
         else_case = None
 
-        if self.current_tok.matches(TT_KEYWORD, 'ELSE'):
+        if self.current_tok.matches(TT_KEYWORD, 'NOWAI'):
             res.register_advancement()
             self.advance()
 
@@ -948,7 +1017,7 @@ class Parser:
         res = ParseResult()
         cases, else_case = [], None
 
-        if self.current_tok.matches(TT_KEYWORD, 'ELIF'):
+        if self.current_tok.matches(TT_KEYWORD, 'MEBBE'):
             all_cases = res.register(self.if_expr_b())
             if res.error: return res
             cases, else_case = all_cases
@@ -975,10 +1044,10 @@ class Parser:
         condition = res.register(self.expr())
         if res.error: return res
 
-        if not self.current_tok.matches(TT_KEYWORD, 'THEN'):
+        if not self.current_tok.matches(TT_KEYWORD, 'YARLY'):
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                f"Expected 'THEN'"
+                f"Expected 'YARLY'"
             ))
 
         res.register_advancement()
@@ -992,7 +1061,7 @@ class Parser:
             if res.error: return res
             cases.append((condition, statements, True))
 
-            if self.current_tok.matches(TT_KEYWORD, 'END'):
+            if self.current_tok.matches(TT_KEYWORD, 'OIC'):
                 res.register_advancement()
                 self.advance()
             else:
@@ -1725,10 +1794,10 @@ class BuiltInFunction(BaseFunction):
 
     #####################################
 
-    def execute_print(self, exec_ctx):
+    def execute_visible(self, exec_ctx):
         print(str(exec_ctx.symbol_table.get('value')))
         return RTResult().success(Number.null)
-    execute_print.arg_names = ['value']
+    execute_visible.arg_names = ['value']
 
     def execute_print_ret(self, exec_ctx):
         return RTResult().success(String(str(exec_ctx.symbol_table.get('value'))))
@@ -1921,7 +1990,7 @@ class BuiltInFunction(BaseFunction):
     execute_run.arg_names = ["fn"]
 
 
-BuiltInFunction.print = BuiltInFunction("print")
+BuiltInFunction.visible = BuiltInFunction("VISIBLE")
 BuiltInFunction.print_ret = BuiltInFunction("print_ret")
 BuiltInFunction.input = BuiltInFunction("input")
 BuiltInFunction.input_int = BuiltInFunction("input_int")
@@ -2233,12 +2302,13 @@ class Interpreter:
 # RUN
 #######################################
 
+
 global_symbol_table = SymbolTable()
 global_symbol_table.set("NULL", Number.null)
 global_symbol_table.set("FALSE", Number.false)
 global_symbol_table.set("TRUE", Number.true)
 global_symbol_table.set("MATH_PI", Number.math_PI)
-global_symbol_table.set("PRINT", BuiltInFunction.print)
+global_symbol_table.set("VISIBLE", BuiltInFunction.visible)
 global_symbol_table.set("PRINT_RET", BuiltInFunction.print_ret)
 global_symbol_table.set("INPUT", BuiltInFunction.input)
 global_symbol_table.set("INPUT_INT", BuiltInFunction.input_int)
