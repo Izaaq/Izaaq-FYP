@@ -29,6 +29,9 @@ class LOLLexer(Lexer):
         WON_OF,         # POWER OPERATOR
         VISIBLE,        # PRINT
         AN,             # and (not logical binary, just for binary operators)
+        DOWN,           # decrement
+        UP,             # increment
+        DOUBLE_EX,      # !! (for increments and decrements)
     }
 
     ignore = ' \t'
@@ -59,6 +62,9 @@ class LOLLexer(Lexer):
     BOTH_SAEM = r'BOTH SAEM'
     DIFFRINT = r'DIFFRINT'
     VISIBLE = r'VISIBLE'
+    DOWN = r'DOWN'
+    UP = r'UP'
+    DOUBLE_EX = r'!!'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
@@ -196,6 +202,26 @@ class LOLParser(Parser):
     def statement(self, p):
         return ('fun_call', p.NAME)
 
+    @_('DOWN NAME DOUBLE_EX expr')
+    def statement(self, p):
+        return ('decrement', p.NAME, p.expr)
+
+    @_('DOWN expr DOUBLE_EX expr')
+    def statement(self, p):
+        return ('decrement_int', p.expr0, p.expr1)
+
+    @_('UP NAME DOUBLE_EX expr')
+    def statement(self, p):
+        return ('increment', p.NAME, p.expr)
+
+    @_('UP expr DOUBLE_EX expr')
+    def statement(self, p):
+        return ('increment_int', p.expr0, p.expr1)
+
+    @_('VISIBLE expr')
+    def statement(self, p):
+        return ('print', p.expr)
+
 class LOLExecute:
 
     def __init__(self, tree, env):
@@ -235,6 +261,10 @@ class LOLExecute:
                 return self.walkTree(node[2][1])
             return self.walkTree(node[2][2])
 
+        if node[0] == 'print':
+            print(self.walkTree(node[1]))
+            return None
+
         if node[0] == 'condition_eqeq':
             return self.walkTree(node[1]) == self.walkTree(node[2])
         elif node[0] == 'condition_neq':
@@ -260,10 +290,33 @@ class LOLExecute:
             return self.walkTree(node[1]) / self.walkTree(node[2])
         elif node[0] == 'mod':
             return self.walkTree(node[1]) % self.walkTree(node[2])
-        elif node[0] == 'min':
+
+        if node[0] == 'min':
             return min(self.walkTree(node[1]), self.walkTree(node[2]))
         elif node[0] == 'max':
             return max(self.walkTree(node[1]), self.walkTree(node[2]))
+
+        if node[0] == 'decrement_int':
+            number = self.walkTree(node[1])
+            decrement = self.walkTree(node[2])
+            toReturn = number - decrement
+            return toReturn
+        elif node[0] == 'decrement':
+            number = self.env[node[1]]
+            decrement = self.walkTree(node[2])
+            toReturn = number - decrement
+            return toReturn
+
+        if node[0] == 'increment_int':
+            number = self.walkTree(node[1])
+            decrement = self.walkTree(node[2])
+            toReturn = number + decrement
+            return toReturn
+        elif node[0] == 'increment':
+            number = self.env[node[1]]
+            decrement = self.walkTree(node[2])
+            toReturn = number + decrement
+            return toReturn
 
         if node[0] == 'var_assign':
             self.env[node[1]] = self.walkTree(node[2])
