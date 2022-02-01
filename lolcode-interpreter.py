@@ -2,6 +2,7 @@ from sly import Lexer
 from sly import Parser
 
 class LexerLOL(Lexer):
+    # dictionary of tokens
     tokens = {
         NAME,
         NUMBER,
@@ -32,6 +33,11 @@ class LexerLOL(Lexer):
         DOWN,           # decrement
         UP,             # increment
         DOUBLE_EX,      # !! (for increments and decrements)
+        O_RLY,          # if statement
+        YA_RLY,         # then (for if)
+        MEBBE,          # elif
+        NO_WAI,         # else
+        OIC,            # end if statement
     }
 
     ignore = ' \t'
@@ -65,6 +71,11 @@ class LexerLOL(Lexer):
     DOWN = r'DOWN'
     UP = r'UP'
     DOUBLE_EX = r'!!'
+    O_RLY = r'O RLY'
+    YA_RLY = r'YA RLY'
+    MEBBE = r'MEBBE'
+    NO_WAI = r'NO WAI'
+    OIC = r'OIC'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
@@ -87,7 +98,7 @@ class LexerLOL(Lexer):
 
 class ParserLOL(Parser):
     # tokens are passed from lexer to parser
-    tokens = LOLLexer.tokens
+    tokens = LexerLOL.tokens
 
     precedence = (
         ('left', "SUM_OF", "DIFF_OF"),
