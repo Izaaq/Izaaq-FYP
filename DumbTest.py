@@ -1,7 +1,7 @@
 from sly import Lexer
 from sly import Parser
 
-class LOLLexer(Lexer):
+class LexerLOL(Lexer):
     tokens = {
         NAME,
         NUMBER,
@@ -85,7 +85,7 @@ class LOLLexer(Lexer):
     def ignore_newline(self, t):
         self.lineno += t.value.count('\n')
 
-class LOLParser(Parser):
+class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LOLLexer.tokens
 
@@ -222,7 +222,7 @@ class LOLParser(Parser):
     def statement(self, p):
         return ('print', p.expr)
 
-class LOLExecute:
+class ExecuteLOL:
 
     def __init__(self, tree, env):
         self.env = env
@@ -347,8 +347,8 @@ class LOLExecute:
             return (self.walkTree(node[1]), self.walkTree(node[2]))
 
 if __name__ == '__main__':
-    lexer = LOLLexer()
-    parser = LOLParser()
+    lexer = LexerLOL()
+    parser = ParserLOL()
     env = {}                # context table
 
     while True:
@@ -362,4 +362,4 @@ if __name__ == '__main__':
             # for token in lex:
             #     print(token)
             tree = parser.parse(lexer.tokenize(text))
-            LOLExecute(tree, env)
+            ExecuteLOL(tree, env)
