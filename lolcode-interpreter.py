@@ -137,7 +137,7 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('sub', p.expr0, p.expr1)
 
-    @_('NAME "=" STRING')
+    @_('I_HAS_A NAME ITZ STRING')
     def var_assign(self, p):
         return ('var_assign', p.NAME, p.STRING)
 
@@ -233,6 +233,14 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('print', p.expr)
 
+    @_('VISIBLE NAME')
+    def statement(self, p):
+        return('print_var', p.NAME)
+
+    @_('VISIBLE STRING')
+    def statement(self, p):
+        return('print', p.STRING)
+
 class ExecuteLOL:
 
     def __init__(self, tree, env):
@@ -275,6 +283,8 @@ class ExecuteLOL:
         if node[0] == 'print':
             print(self.walkTree(node[1]))
             return None
+        elif node[0] == 'print_var':
+            print(self.env[node[1]])
 
         if node[0] == 'condition_eqeq':
             return self.walkTree(node[1]) == self.walkTree(node[2])
