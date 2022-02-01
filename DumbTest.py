@@ -13,7 +13,6 @@ class LOLLexer(Lexer):
         FUN,
         TO,
         ARROW,
-        EQEQ,
         I_HAS_A,        # VAR
         ITZ,            # VAR ASSIGN
         SUM_OF,         # ADD
@@ -238,6 +237,8 @@ class LOLExecute:
 
         if node[0] == 'condition_eqeq':
             return self.walkTree(node[1]) == self.walkTree(node[2])
+        elif node[0] == 'condition_neq':
+            return self.walkTree(node[1]) != self.walkTree(node[2])
 
         if node[0] == 'fun_def':
             self.env[node[1]] = node[2]
