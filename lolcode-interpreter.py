@@ -6,6 +6,7 @@ class LexerLOL(Lexer):
     tokens = {
         NAME,
         NUMBER,
+        FLOAT,
         STRING,
         IF,
         THEN,
@@ -38,6 +39,8 @@ class LexerLOL(Lexer):
         MEBBE,          # elif
         NO_WAI,         # else
         OIC,            # end if statement
+        # IM_IN_YR,       # start of loop
+        # IM_OUTTA_YR,    # end of loop
     }
 
     ignore = ' \t'
@@ -45,39 +48,46 @@ class LexerLOL(Lexer):
     literals = { '=', '+', '-', '/', '*', '(', ')', ',', ';','!' }
 
     # Define tokens as regular expressions, stored as raw strings
-    IF = r'IF'
-    THEN = r'THEN'
-    ELSE = r'ELSE'
-    FOR = r'FOR'
-    FUN = r'FUN'
-    TO = r'TO'
-    I_HAS_A = r'I HAS A'
-    ITZ = r'ITZ'
-    ARROW = r'->'
-    STRING = r'\".*?\"'
-    AN = r'AN'
-    SUM_OF = r'SUM OF'
-    DIFF_OF = r'DIFF OF'
-    PRODUKT_OF = r'PRODUKT OF'
-    QUOSHUNT_OF = r'QUOSHUNT OF'
-    MOD_OF = r'MOD OF'
-    BIGGR_OF = r'BIGGR OF'
-    SMALLR_OF = r'SMALLR OF'
-    WON_OF = r'WON OF'
-    NOT = r'NOT'
-    BOTH_SAEM = r'BOTH SAEM'
-    DIFFRINT = r'DIFFRINT'
-    VISIBLE = r'VISIBLE'
-    DOWN = r'DOWN'
-    UP = r'UP'
-    DOUBLE_EX = r'!!'
-    O_RLY = r'O RLY'
-    YA_RLY = r'YA RLY'
-    MEBBE = r'MEBBE'
-    NO_WAI = r'NO WAI'
-    OIC = r'OIC'
+    IF              = r'IF'
+    THEN            = r'THEN'
+    ELSE            = r'ELSE'
+    FOR             = r'FOR'
+    FUN             = r'FUN'
+    TO              = r'TO'
+    I_HAS_A         = r'I HAS A'
+    ITZ             = r'ITZ'
+    ARROW           = r'->'
+    STRING          = r'\".*?\"'
+    AN              = r'AN'
+    SUM_OF          = r'SUM OF'
+    DIFF_OF         = r'DIFF OF'
+    PRODUKT_OF      = r'PRODUKT OF'
+    QUOSHUNT_OF     = r'QUOSHUNT OF'
+    MOD_OF          = r'MOD OF'
+    BIGGR_OF        = r'BIGGR OF'
+    SMALLR_OF       = r'SMALLR OF'
+    WON_OF          = r'WON OF'
+    NOT             = r'NOT'
+    BOTH_SAEM       = r'BOTH SAEM'
+    DIFFRINT        = r'DIFFRINT'
+    VISIBLE         = r'VISIBLE'
+    DOWN            = r'DOWN'
+    UP              = r'UP'
+    DOUBLE_EX       = r'!!'
+    O_RLY           = r'O RLY'
+    YA_RLY          = r'YA RLY'
+    MEBBE           = r'MEBBE'
+    NO_WAI          = r'NO WAI'
+    OIC             = r'OIC'
 
-    NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
+    NAME            = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+    # Float token
+    @_(r'[+-]?\d+\.\d+')
+    def FLOAT(self, t):
+        # convert into python float
+        t.value = float(t.value)
+        return t
 
     # Number token
     @_(r'\d+')
@@ -185,6 +195,10 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('var', p.NAME)
 
+    @_('FLOAT')
+    def factor(self, p):
+        return ('float', p.FLOAT)
+
     @_('NUMBER')
     def factor(self, p):
         return ('num', p.NUMBER)
@@ -235,11 +249,11 @@ class ParserLOL(Parser):
 
     @_('VISIBLE NAME')
     def statement(self, p):
-        return('print_var', p.NAME)
+        return ('print_var', p.NAME)
 
     @_('VISIBLE STRING')
     def statement(self, p):
-        return('print', p.STRING)
+        return ('print', p.STRING)
 
 class ExecuteLOL:
 
@@ -269,6 +283,9 @@ class ExecuteLOL:
                 self.walkTree(node[2])
 
         if node[0] == 'num':
+            return node[1]
+
+        if node[0] == 'float':
             return node[1]
 
         if node[0] == 'str':
@@ -379,8 +396,8 @@ if __name__ == '__main__':
             break
 
         if text:
-            # lex = lexer.tokenize(text)
-            # for token in lex:
-            #     print(token)
+            lex = lexer.tokenize(text)
+            for token in lex:
+                print(token)
             tree = parser.parse(lexer.tokenize(text))
             ExecuteLOL(tree, env)
