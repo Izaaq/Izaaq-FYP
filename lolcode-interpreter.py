@@ -1,8 +1,13 @@
+# LOLCODE Interpreter in Python by Izaaq Ahmad Izham - FYP Project
+# Uses SLY (Sly Lex Yacc) lexer and parser: https://sly.readthedocs.io/en/latest/sly.html
+# LOLCODE Syntax: https://github.com/justinmeza/lolcode-spec/blob/master/v1.2/lolcode-spec-v1.2.md
+
+# CAN I HAZ FIRST CLASS?
+
 from sly import Lexer
 from sly import Parser
 
 class LexerLOL(Lexer):
-    # dictionary of tokens
     tokens = {
         NAME,
         NUMBER,
@@ -43,8 +48,8 @@ class LexerLOL(Lexer):
         # IM_OUTTA_YR,    # end of loop
     }
 
-    ignore = ' \t'
-    ignore_comment = r'\#.*'
+    ignore = ' \t'  # ignore whitespace
+    ignore_comment = r'BTW\s[^\n]*'
     literals = { '=', '+', '-', '/', '*', '(', ')', ',', ';','!' }
 
     # Define tokens as regular expressions, stored as raw strings
@@ -74,7 +79,7 @@ class LexerLOL(Lexer):
     DOWN            = r'DOWN'
     UP              = r'UP'
     DOUBLE_EX       = r'!!'
-    O_RLY           = r'O RLY'
+    O_RLY           = r'O RLY?'
     YA_RLY          = r'YA RLY'
     MEBBE           = r'MEBBE'
     NO_WAI          = r'NO WAI'
@@ -90,7 +95,7 @@ class LexerLOL(Lexer):
         return t
 
     # Number token
-    @_(r'\d+')
+    @_(r'[+-]?\d+')
     def NUMBER(self, t):
         # convert it into python integer
         t.value = int(t.value)
@@ -109,7 +114,7 @@ class LexerLOL(Lexer):
 class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LexerLOL.tokens
-
+    # setting precedence of binary tokens + unary negative operator
     precedence = (
         ('left', "SUM_OF", "DIFF_OF"),
         ('left', "PRODUKT_OF", "QUOSHUNT_OF"),
@@ -219,6 +224,10 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('if_stmt', p.condition, ('branch', p.statement0, p.statement1))
 
+    @_('condition O_RLY YA_RLY statement NO_WAI statement OIC')
+    def statement(self, p):
+        return ('if_stmt', p.condition, ('branch', p.statement0, p.statement1))
+
     @_('FUN NAME "(" ")" ARROW statement')
     def statement(self, p):
         return ('fun_def', p.NAME, p.statement)
@@ -247,13 +256,13 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('print', p.expr)
 
-    @_('VISIBLE NAME')
-    def statement(self, p):
-        return ('print_var', p.NAME)
-
     @_('VISIBLE STRING')
     def statement(self, p):
         return ('print', p.STRING)
+
+    @_('VISIBLE NAME')
+    def statement(self, p):
+        return ('print_var', p.NAME)
 
 class ExecuteLOL:
 
