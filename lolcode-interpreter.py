@@ -1,11 +1,13 @@
 # LOLCODE Interpreter in Python by Izaaq Ahmad Izham - FYP Project
 # Uses SLY (Sly Lex Yacc) lexer and parser: https://sly.readthedocs.io/en/latest/sly.html
 # LOLCODE Syntax: https://github.com/justinmeza/lolcode-spec/blob/master/v1.2/lolcode-spec-v1.2.md
+# SLY: https://github.com/dabeaz/sly/blob/master/docs/sly.rst
 
 # CAN I HAZ FIRST CLASS?
 
 from sly import Lexer
 from sly import Parser
+import sys
 
 class LexerLOL(Lexer):
     tokens = {
@@ -46,6 +48,10 @@ class LexerLOL(Lexer):
         OIC,            # end if statement
         # IM_IN_YR,       # start of loop
         # IM_OUTTA_YR,    # end of loop
+        HOW_IZ_I,       # function def
+        IF_U_SAY_SO,    # end of function
+        FOUND_YR,       # return
+        KTHXBYE,        # ends program
     }
 
     ignore = ' \t'  # ignore whitespace
@@ -79,11 +85,16 @@ class LexerLOL(Lexer):
     DOWN            = r'DOWN'
     UP              = r'UP'
     DOUBLE_EX       = r'!!'
-    O_RLY           = r'O RLY?'
+    O_RLY           = r'O RLY'
     YA_RLY          = r'YA RLY'
     MEBBE           = r'MEBBE'
     NO_WAI          = r'NO WAI'
     OIC             = r'OIC'
+    HOW_IZ_I        = r'HOW IZ I'
+    IF_U_SAY_SO     = r'IF U SAY SO'
+    FOUND_YR        = r'FOUND YR'
+    GTFO            = r'GTFO'
+    KTHXBYE         = r'KTHXBYE'
 
     NAME            = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
@@ -128,12 +139,36 @@ class ParserLOL(Parser):
     def statement(self, p):
         pass
 
+    @_('FOR var_assign TO expr THEN statement')
+    def statement(self, p):
+        return ('for_loop', ('for_loop_setup', p.var_assign, p.expr), p.statement)
+
+    @_('O_RLY expr YA_RLY statement NO_WAI statement OIC')
+    def statement(self, p):
+        return ('if_else_stmt', p.expr, ('branch', p.statement0, p.statement1))
+
+    @_('O_RLY expr YA_RLY statement OIC')
+    def statement(self, p):
+        return ('if_stmt', p.expr, p.statement)
+
+    @_('O_RLY expr YA_RLY statement MEBBE expr statement NO_WAI statement OIC')
+    def statement(self, p):
+        return ('if_elif_stmt', p.expr0, p.statement0, p.expr1, p.statement1, p.statement2)
+
+    @_('FUN NAME "(" ")" ARROW statement')
+    def statement(self, p):
+        return ('fun_def', p.NAME, p.statement)
+
+    @_('NAME "(" ")"')
+    def statement(self, p):
+        return ('fun_call', p.NAME)
+
     @_('BOTH_SAEM expr AN expr')
-    def condition(self, p):
+    def expr(self, p):
         return ('condition_eqeq', p.expr0, p.expr1)
 
     @_('DIFFRINT expr AN expr')
-    def condition(self, p):
+    def expr(self, p):
         return ('condition_neq', p.expr0, p.expr1)
 
     @_('var_assign')
@@ -144,6 +179,14 @@ class ParserLOL(Parser):
     def var_assign(self, p):
         return ('var_assign', p.NAME, p.expr)
 
+    @_('I_HAS_A NAME ITZ STRING')
+    def var_assign(self, p):
+        return ('var_assign', p.NAME, p.STRING)
+
+    @_('expr')
+    def statement(self, p):
+        return (p.expr)
+
     @_('SUM_OF expr AN expr')
     def expr(self, p):
         return ('add', p.expr0, p.expr1)
@@ -152,25 +195,17 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('sub', p.expr0, p.expr1)
 
-    @_('I_HAS_A NAME ITZ STRING')
-    def var_assign(self, p):
-        return ('var_assign', p.NAME, p.STRING)
-
-    @_('term')
-    def expr(self, p):
-        return (p.term)
-
     @_('PRODUKT_OF expr AN expr')
-    def term(self, p):
+    def expr(self, p):
         return ('mul', p.expr0, p.expr1)
 
     @_('QUOSHUNT_OF expr AN expr')
-    def term(self, p):
+    def expr(self, p):
         return ('div', p.expr0, p.expr1)
 
     @_('MOD_OF expr AN expr')
-    def term(self, p):
-        return ('mod', p.term, p.factor)
+    def expr(self, p):
+        return ('mod', p.expr0, p.expr1)
 
     @_('SMALLR_OF expr AN expr')
     def expr(self, p):
@@ -184,57 +219,9 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('power', p.expr0, p.expr1)
 
-    @_('factor')
-    def term(self, p):
-        return p.factor
-
-    @_('expr')
-    def statement(self, p):
-        return (p.expr)
-
     @_('"-" expr %prec UMINUS')
     def expr(self, p):
         return p.expr
-
-    @_('NAME')
-    def expr(self, p):
-        return ('var', p.NAME)
-
-    @_('FLOAT')
-    def factor(self, p):
-        return ('float', p.FLOAT)
-
-    @_('NUMBER')
-    def factor(self, p):
-        return ('num', p.NUMBER)
-
-    @_('GTFO')
-    def statement(self, p):
-        return ('break', p.GTFO)
-
-    @_('"(" expr ")"')
-    def factor(self, p):
-        return p.expr
-
-    @_('FOR var_assign TO expr THEN statement')
-    def statement(self, p):
-        return ('for_loop', ('for_loop_setup', p.var_assign, p.expr), p.statement)
-
-    @_('IF condition THEN statement ELSE statement')
-    def statement(self, p):
-        return ('if_stmt', p.condition, ('branch', p.statement0, p.statement1))
-
-    @_('condition O_RLY YA_RLY statement NO_WAI statement OIC')
-    def statement(self, p):
-        return ('if_stmt', p.condition, ('branch', p.statement0, p.statement1))
-
-    @_('FUN NAME "(" ")" ARROW statement')
-    def statement(self, p):
-        return ('fun_def', p.NAME, p.statement)
-
-    @_('NAME "(" ")"')
-    def statement(self, p):
-        return ('fun_call', p.NAME)
 
     @_('DOWN NAME DOUBLE_EX expr')
     def statement(self, p):
@@ -263,6 +250,30 @@ class ParserLOL(Parser):
     @_('VISIBLE NAME')
     def statement(self, p):
         return ('print_var', p.NAME)
+
+    @_('NAME')
+    def expr(self, p):
+        return ('var', p.NAME)
+
+    @_('FLOAT')
+    def expr(self, p):
+        return ('float', p.FLOAT)
+
+    @_('NUMBER')
+    def expr(self, p):
+        return ('num', p.NUMBER)
+
+    @_('GTFO')
+    def statement(self, p):
+        return ('break', p.GTFO)
+
+    @_('FOUND_YR expr')
+    def expr(self, p):
+        return ('ret', p.expr)
+
+    @_('KTHXBYE')
+    def expr(self, p):
+        return ('end')
 
 class ExecuteLOL:
 
@@ -300,22 +311,35 @@ class ExecuteLOL:
         if node[0] == 'str':
             return node[1]
 
-        if node[0] == 'if_stmt':
-            result = self.walkTree(node[1])
-            if result:
-                return self.walkTree(node[2][1])
-            return self.walkTree(node[2][2])
-
-        if node[0] == 'print':
-            print(self.walkTree(node[1]))
-            return None
-        elif node[0] == 'print_var':
-            print(self.env[node[1]])
-
         if node[0] == 'condition_eqeq':
             return self.walkTree(node[1]) == self.walkTree(node[2])
         elif node[0] == 'condition_neq':
             return self.walkTree(node[1]) != self.walkTree(node[2])
+
+        if node[0] == 'if_else_stmt':
+            result = self.walkTree(node[1])
+            if result:
+                return self.walkTree(node[2][1])
+            return self.walkTree(node[2][2])
+        elif node[0] == 'if_stmt':
+            result = self.walkTree(node[1])
+            if result:
+                return self.walkTree(node[2])
+        elif node[0] == 'if_elif_stmt':
+            result1 = self.walkTree(node[1])
+            if result1:
+                return self.walkTree(node[2])
+            else:
+                result2 = self.walkTree(node[3])
+                if result2:
+                    return self.walkTree(node[4])
+            return self.walkTree(node[5])
+
+
+        if node[0] == 'print':
+            print(self.walkTree(node[1]))
+        elif node[0] == 'print_var':
+            print(self.env[node[1]])
 
         if node[0] == 'fun_def':
             self.env[node[1]] = node[2]
@@ -392,6 +416,13 @@ class ExecuteLOL:
 
         if node[0] == 'for_loop_setup':
             return (self.walkTree(node[1]), self.walkTree(node[2]))
+
+        if node[0] == 'ret':
+            return (self.walkTree(node[1]))
+
+        if node[0] == 'end':
+            print("end")
+            sys.exit()
 
 if __name__ == '__main__':
     lexer = LexerLOL()
