@@ -3,7 +3,7 @@
 # LOLCODE Syntax: https://github.com/justinmeza/lolcode-spec/blob/master/v1.2/lolcode-spec-v1.2.md
 # SLY: https://github.com/dabeaz/sly/blob/master/docs/sly.rst
 
-# CAN I HAZ FIRST CLASS?
+# I HAS A grade ITZ "FIRST CLASS"
 
 from sly import Lexer
 from sly import Parser
