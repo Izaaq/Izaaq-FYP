@@ -15,13 +15,6 @@ class LexerLOL(Lexer):
         NUMBER,
         FLOAT,
         STRING,
-        IF,
-        THEN,
-        ELSE,
-        FOR,
-        FUN,
-        TO,
-        ARROW,
         I_HAS_A,        # VAR
         ITZ,            # VAR ASSIGN
         SUM_OF,         # ADD
@@ -46,10 +39,12 @@ class LexerLOL(Lexer):
         MEBBE,          # elif
         NO_WAI,         # else
         OIC,            # end if statement
-        # IM_IN_YR,       # start of loop
-        # IM_OUTTA_YR,    # end of loop
+        IM_IN_YR,       # start of loop
+        IM_OUTTA_YR,    # end of loop
         HOW_IZ_I,       # function def
         IF_U_SAY_SO,    # end of function
+        I_IZ,           # function call
+        MKAY,           # end of function call
         FOUND_YR,       # return
         KTHXBYE,        # ends program
     }
@@ -59,15 +54,8 @@ class LexerLOL(Lexer):
     literals = { '=', '+', '-', '/', '*', '(', ')', ',', ';','!' }
 
     # Define tokens as regular expressions, stored as raw strings
-    IF              = r'IF'
-    THEN            = r'THEN'
-    ELSE            = r'ELSE'
-    FOR             = r'FOR'
-    FUN             = r'FUN'
-    TO              = r'TO'
     I_HAS_A         = r'I HAS A'
     ITZ             = r'ITZ'
-    ARROW           = r'->'
     STRING          = r'\".*?\"'
     AN              = r'AN'
     SUM_OF          = r'SUM OF'
@@ -93,6 +81,8 @@ class LexerLOL(Lexer):
     HOW_IZ_I        = r'HOW IZ I'
     IF_U_SAY_SO     = r'IF U SAY SO'
     FOUND_YR        = r'FOUND YR'
+    I_IZ            = r'I IZ'
+    MKAY            = r'MKAY'
     GTFO            = r'GTFO'
     KTHXBYE         = r'KTHXBYE'
 
@@ -139,9 +129,9 @@ class ParserLOL(Parser):
     def statement(self, p):
         pass
 
-    @_('FOR var_assign TO expr THEN statement')
-    def statement(self, p):
-        return ('for_loop', ('for_loop_setup', p.var_assign, p.expr), p.statement)
+    # @_('FOR var_assign TO expr THEN statement')
+    # def statement(self, p):
+    #     return ('for_loop', ('for_loop_setup', p.var_assign, p.expr), p.statement)
 
     @_('O_RLY expr YA_RLY statement NO_WAI statement OIC')
     def statement(self, p):
@@ -155,11 +145,11 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('if_elif_stmt', p.expr0, p.statement0, p.expr1, p.statement1, p.statement2)
 
-    @_('FUN NAME "(" ")" ARROW statement')
+    @_('HOW_IZ_I NAME statement IF_U_SAY_SO')
     def statement(self, p):
         return ('fun_def', p.NAME, p.statement)
 
-    @_('NAME "(" ")"')
+    @_('I_IZ NAME MKAY')
     def statement(self, p):
         return ('fun_call', p.NAME)
 
@@ -225,7 +215,7 @@ class ParserLOL(Parser):
 
     @_('DOWN NAME DOUBLE_EX expr')
     def statement(self, p):
-        return ('decrement', p.NAME, p.expr)
+        return ('decrement_var', p.NAME, p.expr)
 
     @_('DOWN expr DOUBLE_EX expr')
     def statement(self, p):
@@ -233,7 +223,7 @@ class ParserLOL(Parser):
 
     @_('UP NAME DOUBLE_EX expr')
     def statement(self, p):
-        return ('increment', p.NAME, p.expr)
+        return ('increment_var', p.NAME, p.expr)
 
     @_('UP expr DOUBLE_EX expr')
     def statement(self, p):
@@ -335,11 +325,14 @@ class ExecuteLOL:
                     return self.walkTree(node[4])
             return self.walkTree(node[5])
 
-
         if node[0] == 'print':
             print(self.walkTree(node[1]))
         elif node[0] == 'print_var':
-            print(self.env[node[1]])
+            try:
+                print(self.env[node[1]])
+            except LookupError:
+                print("Undefined variable '" + node[1] + "' found!")
+                return 0
 
         if node[0] == 'fun_def':
             self.env[node[1]] = node[2]
@@ -372,8 +365,12 @@ class ExecuteLOL:
             decrement = self.walkTree(node[2])
             toReturn = number - decrement
             return toReturn
-        elif node[0] == 'decrement':
-            number = self.env[node[1]]
+        elif node[0] == 'decrement_var':
+            try:
+                number = self.env[node[1]]
+            except LookupError:
+                print("Undefined variable '" + node[1] + "' found!")
+                return 0
             decrement = self.walkTree(node[2])
             toReturn = number - decrement
             return toReturn
@@ -383,8 +380,12 @@ class ExecuteLOL:
             decrement = self.walkTree(node[2])
             toReturn = number + decrement
             return toReturn
-        elif node[0] == 'increment':
-            number = self.env[node[1]]
+        elif node[0] == 'increment_var':
+            try:
+                number = self.env[node[1]]
+            except LookupError:
+                print("Undefined variable '" + node[1] + "' found!")
+                return 0
             decrement = self.walkTree(node[2])
             toReturn = number + decrement
             return toReturn
