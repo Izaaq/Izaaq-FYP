@@ -46,6 +46,7 @@ class LexerLOL(Lexer):
         I_IZ,           # function call
         MKAY,           # end of function call
         FOUND_YR,       # return
+        GIMMEH,         # input
         KTHXBYE,        # ends program
     }
 
@@ -84,6 +85,7 @@ class LexerLOL(Lexer):
     I_IZ            = r'I IZ'
     MKAY            = r'MKAY'
     GTFO            = r'GTFO'
+    GIMMEH          = r'GIMMEH'
     KTHXBYE         = r'KTHXBYE'
 
     NAME            = r'[a-zA-Z_][a-zA-Z0-9_]*'
@@ -241,6 +243,10 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('print_var', p.NAME)
 
+    @_('GIMMEH NAME')
+    def statement(self, p):
+        return ('input', p.NAME)
+
     @_('NAME')
     def expr(self, p):
         return ('var', p.NAME)
@@ -263,7 +269,8 @@ class ParserLOL(Parser):
 
     @_('KTHXBYE')
     def expr(self, p):
-        return ('end')
+        sys.exit()
+        # return ('end')
 
 class ExecuteLOL:
 
@@ -390,6 +397,10 @@ class ExecuteLOL:
             toReturn = number + decrement
             return toReturn
 
+        if node[0] == 'input':
+            self.env[node[1]] = input()
+            return node[1]
+
         if node[0] == 'var_assign':
             self.env[node[1]] = self.walkTree(node[2])
             return node[1]
@@ -438,7 +449,7 @@ if __name__ == '__main__':
 
         if text:
             lex = lexer.tokenize(text)
-            for token in lex:
-                print(token)
-            tree = parser.parse(lexer.tokenize(text))
+            # for token in lex:
+            #     print(token)
+            tree = parser.parse(lex)
             ExecuteLOL(tree, env)
