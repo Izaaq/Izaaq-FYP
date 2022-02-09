@@ -15,8 +15,9 @@ class LexerLOL(Lexer):
         NUMBER,
         FLOAT,
         STRING,
-        I_HAS_A,        # VAR
-        ITZ,            # VAR ASSIGN
+        I_HAS_A,        # VAR DEFINITION
+        ITZ,            # VAR DEFINITION
+        R,              # VAR ASSIGN
         SUM_OF,         # ADD
         DIFF_OF,        # MINUS
         PRODUKT_OF,     # MULTIPLY
@@ -57,6 +58,7 @@ class LexerLOL(Lexer):
     # Define tokens as regular expressions, stored as raw strings
     I_HAS_A         = r'I HAS A'
     ITZ             = r'ITZ'
+    R               = r'R'
     STRING          = r'\".*?\"'
     AN              = r'AN'
     SUM_OF          = r'SUM OF'
@@ -169,9 +171,17 @@ class ParserLOL(Parser):
 
     @_('I_HAS_A NAME ITZ expr')
     def var_assign(self, p):
-        return ('var_assign', p.NAME, p.expr)
+        return ('var_def', p.NAME, p.expr)
 
     @_('I_HAS_A NAME ITZ STRING')
+    def var_assign(self, p):
+        return ('var_def', p.NAME, p.STRING)
+
+    @_('NAME R expr')
+    def var_assign(self, p):
+        return ('var_assign', p.NAME, p.expr)
+
+    @_('NAME R STRING')
     def var_assign(self, p):
         return ('var_assign', p.NAME, p.STRING)
 
@@ -401,9 +411,17 @@ class ExecuteLOL:
             self.env[node[1]] = input()
             return node[1]
 
-        if node[0] == 'var_assign':
+        if node[0] == 'var_def':
             self.env[node[1]] = self.walkTree(node[2])
             return node[1]
+
+        if node[0] == 'var_assign':
+            try:
+                self.env[node[1]] = self.walkTree(node[2])
+                return self.env[node[1]]
+            except LookupError:
+                print("Undefined variable '" + node[1] + "' found!")
+                return 0
 
         if node[0] == 'var':
             try:
