@@ -1,115 +1,140 @@
-# LOLCODE Interpreter in Python by Izaaq Ahmad Izham - FYP Project
-# Uses SLY (Sly Lex Yacc) lexer and parser: https://sly.readthedocs.io/en/latest/sly.html
-# LOLCODE Syntax: https://github.com/justinmeza/lolcode-spec/blob/master/v1.2/lolcode-spec-v1.2.md
-# SLY: https://github.com/dabeaz/sly/blob/master/docs/sly.rst
-
-# I HAS A grade ITZ "FIRST CLASS"
-
 from sly import Lexer
 from sly import Parser
 import sys
+import types
 
 class LexerLOL(Lexer):
     tokens = {
-        NAME,
-        NUMBER,
-        FLOAT,
+        IDENTIFIER,
         STRING,
-        I_HAS_A,        # VAR DEFINITION
-        ITZ,            # VAR DEFINITION
-        R,              # VAR ASSIGN
-        SUM_OF,         # ADD
-        DIFF_OF,        # MINUS
-        PRODUKT_OF,     # MULTIPLY
-        QUOSHUNT_OF,    # DIVIDE
-        MOD_OF,         # INTEGER DIVISION (MODULO)
-        BIGGR_OF,       # MAX OF TWO NUMBERS
-        SMALLR_OF,      # MIN OF TWO NUMBERS
-        GTFO,           # BREAK
-        NOT,            # UNARY !
-        BOTH_SAEM,      # ==
-        DIFFRINT,       # !=
-        WON_OF,         # POWER OPERATOR
-        VISIBLE,        # PRINT
-        AN,             # and (not logical binary, just for binary operators)
-        DOWN,           # decrement
-        UP,             # increment
-        DOUBLE_EX,      # !! (for increments and decrements)
-        O_RLY,          # if statement
-        YA_RLY,         # then (for if)
-        MEBBE,          # elif
-        NO_WAI,         # else
-        OIC,            # end if statement
-        IM_IN_YR,       # start of loop
-        IM_OUTTA_YR,    # end of loop
-        HOW_IZ_I,       # function def
-        IF_U_SAY_SO,    # end of function
-        I_IZ,           # function call
-        MKAY,           # end of function call
-        FOUND_YR,       # return
-        GIMMEH,         # input
-        KTHXBYE,        # ends program
+        INTEGER,
+        FLOAT,
+        BOOLEAN,
+        I_HAS_A,
+        ITZ,
+        R,
+        MAEK,
+        A,
+        IS_NOW_A,
+        TYPE,
+        VISIBLE,
+        GIMMEH,
+        SUM_OF,
+        DIFF_OF,
+        PRODUKT_OF,
+        QUOSHUNT_OF,
+        MOD_OF,
+        BIGGR_OF,
+        SMALLR_OF,
+        BOTH_OF,
+        EITHER_OF,
+        WON_OF,
+        NOT,
+        ALL_OF,
+        ANY_OF,
+        SMOOSH,
+        MKAY,
+        BOTH_SAEM,
+        DIFFRINT,
+        O_RLY,
+        YA_RLY,
+        NO_WAI,
+        IM_IN_YR,
+        IM_OUTTA_YR,
+        GTFO,
+        HAI,
+        KTHXBYE,
+        HOW_IZ_I,
+        I_IZ,
+        YR,
+        AN,
+        FOUND_YR,
+        IF_U_SAY_SO,
+        OIC,
+        EOL,
     }
 
     ignore = ' \t'  # ignore whitespace
     ignore_comment = r'BTW\s[^\n]*'
-    literals = { '=', '+', '-', '/', '*', '(', ')', ',', ';','!' }
+    literals = { '!' }
 
     # Define tokens as regular expressions, stored as raw strings
-    I_HAS_A         = r'I HAS A'
-    ITZ             = r'ITZ'
-    R               = r'R'
-    STRING          = r'\".*?\"'
-    AN              = r'AN'
-    SUM_OF          = r'SUM OF'
-    DIFF_OF         = r'DIFF OF'
-    PRODUKT_OF      = r'PRODUKT OF'
-    QUOSHUNT_OF     = r'QUOSHUNT OF'
-    MOD_OF          = r'MOD OF'
-    BIGGR_OF        = r'BIGGR OF'
-    SMALLR_OF       = r'SMALLR OF'
-    WON_OF          = r'WON OF'
-    NOT             = r'NOT'
-    BOTH_SAEM       = r'BOTH SAEM'
-    DIFFRINT        = r'DIFFRINT'
-    VISIBLE         = r'VISIBLE'
-    DOWN            = r'DOWN'
-    UP              = r'UP'
-    DOUBLE_EX       = r'!!'
-    O_RLY           = r'O RLY'
-    YA_RLY          = r'YA RLY'
-    MEBBE           = r'MEBBE'
-    NO_WAI          = r'NO WAI'
-    OIC             = r'OIC'
-    HOW_IZ_I        = r'HOW IZ I'
-    IF_U_SAY_SO     = r'IF U SAY SO'
-    FOUND_YR        = r'FOUND YR'
-    I_IZ            = r'I IZ'
-    MKAY            = r'MKAY'
-    GTFO            = r'GTFO'
-    GIMMEH          = r'GIMMEH'
-    KTHXBYE         = r'KTHXBYE'
+    I_HAS_A         = r'I\s+HAS\s+A\b'
+    ITZ             = r'ITZ\b'
+    R               = r'R\b'
+    MAEK            = r'MAEK\b'
+    IS_NOW_A        = r'IS\s+NOW\s+A\b'
+    A               = r'A\b'
+    TYPE            = r'((?:NUMBA?R)|(?:YARN)|(?:TROOF)|(?:NOOB))\b'
+    VISIBLE         = r'VISIBLE\b'
+    GIMMEH          = r'GIMMEH\b'
+    SUM_OF          = r'SUM\s+OF\b'
+    DIFF_OF         = r'DIFF\s+OF\b'
+    PRODUKT_OF      = r'PRODUKT\s+OF\b'
+    QUOSHUNT_OF     = r'QUOSHUNT\s+OF\b'
+    MOD_OF          = r'MOD\s+OF\b'
+    BIGGR_OF        = r'BIGGR\s+OF\b'
+    SMALLR_OF       = r'SMALLR\s+OF\b'
+    BOTH_OF         = r'BOTH\s+OF\b'
+    EITHER_OF       = r'EITHER\s+OF\b'
+    WON_OF          = r'WON\s+OF\b'
+    NOT             = r'NOT\b'
+    ALL_OF          = r'ALL\s+OF\b'
+    ANY_OF          = r'ANY\s+OF\b'
+    SMOOSH          = r'SMOOSH\s+\b'
+    MKAY            = r'MKAY\b'
+    BOTH_SAEM       = r'BOTH\s+SAEM\b'
+    DIFFRINT        = r'DIFFRINT\b'
+    O_RLY           = r'O\s+RLY\b'
+    YA_RLY          = r'YA\s+RLY\b'
+    NO_WAI          = r'NO\s+WAI\b'
+    IM_IN_YR        = r'IM\s+IN\s+YR\b'
+    IM_OUTTA_YR     = r'IM\s+OUTTA\s+YR\b'
+    GTFO            = r'GTFO\b'
+    HAI             = r'HAI\b'
+    KTHXBYE         = r'KTHXBYE\b'
+    HOW_IZ_I        = r'HOW\s+IZ\s+I\b'
+    I_IZ            = r'I\s+IZ\b'
+    YR              = r'YR\b'
+    AN              = r'AN\b'
+    FOUND_YR        = r'FOUND\s+YR\b'
+    IF_U_SAY_SO     = r'IF\s+U\s+SAY\s+SO\b'
+    OIC             = r'OIC\b'
 
-    NAME            = r'[a-zA-Z_][a-zA-Z0-9_]*'
+    IDENTIFIER      = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
-    # Float token
     @_(r'[+-]?\d+\.\d+')
     def FLOAT(self, t):
         # convert into python float
         t.value = float(t.value)
         return t
 
-    # Number token
     @_(r'[+-]?\d+')
-    def NUMBER(self, t):
+    def INTEGER(self, t):
         # convert it into python integer
         t.value = int(t.value)
         return t
 
-    # Comment token
+    @_(r'("|\')(?:[^:"\']|::|:"|:\')*("|\')')
+    def STRING(self, t):
+        # convert into python string
+        t.value = str(t.value)
+        return t
+
+    @_(r'(?:WIN)|(?:FAIL)')
+    def BOOLEAN(self, t):
+        return t
+
     @_(r'BTW\s[^\n]*')
     def COMMENT(self, t):
         pass
+
+    @_(r',|\n')
+    def EOL(self, t):
+        if t.value == '\n':
+            self.lineno += 1
+        t.value = 'EOL'
+        return t
 
     # Newline token
     @_(r'\n+')
@@ -120,11 +145,11 @@ class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LexerLOL.tokens
     # setting precedence of binary tokens + unary negative operator
-    precedence = (
-        ('left', "SUM_OF", "DIFF_OF"),
-        ('left', "PRODUKT_OF", "QUOSHUNT_OF"),
-        ('right', 'UMINUS'),
-    )
+    # precedence = (
+    #     ('left', "SUM_OF", "DIFF_OF"),
+    #     ('left', "PRODUKT_OF", "QUOSHUNT_OF"),
+    #     ('right', 'UMINUS'),
+    # )
 
     def __init__(self):
         self.env = {}
@@ -133,154 +158,109 @@ class ParserLOL(Parser):
     def statement(self, p):
         pass
 
-    # @_('FOR var_assign TO expr THEN statement')
-    # def statement(self, p):
-    #     return ('for_loop', ('for_loop_setup', p.var_assign, p.expr), p.statement)
-
-    @_('O_RLY expr YA_RLY statement NO_WAI statement OIC')
-    def statement(self, p):
-        return ('if_else_stmt', p.expr, ('branch', p.statement0, p.statement1))
-
-    @_('O_RLY expr YA_RLY statement OIC')
-    def statement(self, p):
-        return ('if_stmt', p.expr, p.statement)
-
-    @_('O_RLY expr YA_RLY statement MEBBE expr statement NO_WAI statement OIC')
-    def statement(self, p):
-        return ('if_elif_stmt', p.expr0, p.statement0, p.expr1, p.statement1, p.statement2)
-
-    @_('HOW_IZ_I NAME statement IF_U_SAY_SO')
-    def statement(self, p):
-        return ('fun_def', p.NAME, p.statement)
-
-    @_('I_IZ NAME MKAY')
-    def statement(self, p):
-        return ('fun_call', p.NAME)
-
-    @_('BOTH_SAEM expr AN expr')
-    def expr(self, p):
-        return ('condition_eqeq', p.expr0, p.expr1)
-
-    @_('DIFFRINT expr AN expr')
-    def expr(self, p):
-        return ('condition_neq', p.expr0, p.expr1)
-
-    @_('var_assign')
-    def statement(self, p):
-        return p.var_assign
-
-    @_('I_HAS_A NAME ITZ expr')
-    def var_assign(self, p):
-        return ('var_def', p.NAME, p.expr)
-
-    @_('I_HAS_A NAME ITZ STRING')
-    def var_assign(self, p):
-        return ('var_def', p.NAME, p.STRING)
-
-    @_('NAME R expr')
-    def var_assign(self, p):
-        return ('var_assign', p.NAME, p.expr)
-
-    @_('NAME R STRING')
-    def var_assign(self, p):
-        return ('var_assign', p.NAME, p.STRING)
-
     @_('expr')
     def statement(self, p):
-        return (p.expr)
-
-    @_('SUM_OF expr AN expr')
-    def expr(self, p):
-        return ('add', p.expr0, p.expr1)
-
-    @_('DIFF_OF expr AN expr')
-    def expr(self, p):
-        return ('sub', p.expr0, p.expr1)
-
-    @_('PRODUKT_OF expr AN expr')
-    def expr(self, p):
-        return ('mul', p.expr0, p.expr1)
-
-    @_('QUOSHUNT_OF expr AN expr')
-    def expr(self, p):
-        return ('div', p.expr0, p.expr1)
-
-    @_('MOD_OF expr AN expr')
-    def expr(self, p):
-        return ('mod', p.expr0, p.expr1)
-
-    @_('SMALLR_OF expr AN expr')
-    def expr(self, p):
-        return ('min', p.expr0, p.expr1)
-
-    @_('BIGGR_OF expr AN expr')
-    def expr(self, p):
-        return ('max', p.expr0, p.expr1)
-
-    @_('WON_OF expr AN expr')
-    def expr(self, p):
-        return ('power', p.expr0, p.expr1)
-
-    @_('"-" expr %prec UMINUS')
-    def expr(self, p):
         return p.expr
 
-    @_('DOWN NAME DOUBLE_EX expr')
+    @_('VISIBLE expr "!"',
+       'VISIBLE expr')
     def statement(self, p):
-        return ('decrement_var', p.NAME, p.expr)
+        if len(p) == 3:
+            return ('print', p.expr)
+        return ('printline', p.expr)
 
-    @_('DOWN expr DOUBLE_EX expr')
+    @_('GIMMEH IDENTIFIER')
     def statement(self, p):
-        return ('decrement_int', p.expr0, p.expr1)
+        return ('input', p.IDENTIFIER)
 
-    @_('UP NAME DOUBLE_EX expr')
+    @_('I_HAS_A IDENTIFIER ITZ expr',
+       'I_HAS_A IDENTIFIER')
     def statement(self, p):
-        return ('increment_var', p.NAME, p.expr)
+        if len(p) == 4:
+            return ('var_def', p.IDENTIFIER, p.expr)
+        return ('var_dec', p.IDENTIFIER)
 
-    @_('UP expr DOUBLE_EX expr')
+    @_('IDENTIFIER R expr')
     def statement(self, p):
-        return ('increment_int', p.expr0, p.expr1)
+        return ('assign', p.IDENTIFIER, p.expr)
 
-    @_('VISIBLE expr')
+    @_('IDENTIFIER IS_NOW_A TYPE')
     def statement(self, p):
-        return ('print', p.expr)
+        return ('convert', p.IDENTIFIER, p.TYPE)
 
-    @_('VISIBLE STRING')
+    @_('O_RLY expr YA_RLY statement OIC',
+       'O_RLY expr YA_RLY statement NO_WAI statement OIC')  # update to include EOL tokens + statement list
     def statement(self, p):
-        return ('print', p.STRING)
+        if len(p) == 5:
+            return ('if', p.expr, p.statement)
+        return ('if_else', p.expr, p.statement0, p.statement1)
 
-    @_('VISIBLE NAME')
+    # @_('O_RLY expr YA_RLY statement NO_WAI statement OIC')  # update to include EOL tokens + statement list
+    # def statement(self, p):
+    #     return ('if_else', p.expr, p.statement0, p.statement1)
+
+    @_('IM_IN_YR IDENTIFIER statement IM_OUTTA_YR IDENTIFIER')  # update to include EOL tokens + statement list
     def statement(self, p):
-        return ('print_var', p.NAME)
+        return ('loop', p.IDENTIFIER0, p.statement, p.IDENTIFIER1)
 
-    @_('GIMMEH NAME')
+    @_('GTFO')
     def statement(self, p):
-        return ('input', p.NAME)
+        return ('break')
 
-    @_('NAME')
+    @_('HOW_IZ_I IDENTIFIER statement IF_U_SAY_SO')  # update to include EOL tokens + statement list + arg list
+    def statement(self, p):
+        return ('func_def', p.IDENTIFIER, p.statement)
+
+    @_('I_IZ IDENTIFIER MKAY')
+    def statement(self, p):
+        return ('func_call', p.IDENTIFIER)
+
+    @_('FOUND_YR expr')
+    def statement(self, p):
+        return ('return', p.expr)
+
+    @_('NOT expr')
     def expr(self, p):
-        return ('var', p.NAME)
+        return ('not', p.expr)
+
+    @_('SUM_OF expr AN expr',
+       'DIFF_OF expr AN expr',
+       'PRODUKT_OF expr AN expr',
+       'QUOSHUNT_OF expr AN expr',
+       'MOD_OF expr AN expr',
+       'BIGGR_OF expr AN expr',
+       'SMALLR_OF expr AN expr',
+       'WON_OF expr AN expr',
+       'BOTH_SAEM expr AN expr',
+       'DIFFRINT expr AN expr')
+    def expr(self, p):
+        return ('bin_op', p[0], p.expr0, p.expr1)
 
     @_('FLOAT')
     def expr(self, p):
         return ('float', p.FLOAT)
 
-    @_('NUMBER')
+    @_('INTEGER')
     def expr(self, p):
-        return ('num', p.NUMBER)
+        return ('int', p.INTEGER)
 
-    @_('GTFO')
-    def statement(self, p):
-        return ('break', p.GTFO)
-
-    @_('FOUND_YR expr')
+    @_('STRING')                    # update to include SMOOSH
     def expr(self, p):
-        return ('ret', p.expr)
+        return ('string', p.STRING)
+
+    @_('IDENTIFIER')
+    def expr(self, p):
+        return ('var', p.IDENTIFIER)
 
     @_('KTHXBYE')
-    def expr(self, p):
+    def statement(self, p):
         sys.exit()
-        # return ('end')
+
+class Break(Exception):
+    pass
+
+class Return(Exception):
+    pass
 
 class ExecuteLOL:
 
@@ -298,18 +278,20 @@ class ExecuteLOL:
             return node
         if isinstance(node, str):
             return node
+        if isinstance(node, float):
+            return node
 
         if node is None:
             return None
 
         if node[0] == 'program':
-            if node[1] == None:
+            if node[1] is None:
                 self.walkTree(node[2])
             else:
                 self.walkTree(node[1])
                 self.walkTree(node[2])
 
-        if node[0] == 'num':
+        if node[0] == 'int':
             return node[1]
 
         if node[0] == 'float':
@@ -318,94 +300,11 @@ class ExecuteLOL:
         if node[0] == 'str':
             return node[1]
 
-        if node[0] == 'condition_eqeq':
-            return self.walkTree(node[1]) == self.walkTree(node[2])
-        elif node[0] == 'condition_neq':
-            return self.walkTree(node[1]) != self.walkTree(node[2])
-
-        if node[0] == 'if_else_stmt':
-            result = self.walkTree(node[1])
-            if result:
-                return self.walkTree(node[2][1])
-            return self.walkTree(node[2][2])
-        elif node[0] == 'if_stmt':
-            result = self.walkTree(node[1])
-            if result:
-                return self.walkTree(node[2])
-        elif node[0] == 'if_elif_stmt':
-            result1 = self.walkTree(node[1])
-            if result1:
-                return self.walkTree(node[2])
-            else:
-                result2 = self.walkTree(node[3])
-                if result2:
-                    return self.walkTree(node[4])
-            return self.walkTree(node[5])
-
         if node[0] == 'print':
             print(self.walkTree(node[1]))
-        elif node[0] == 'print_var':
-            try:
-                print(self.env[node[1]])
-            except LookupError:
-                print("Undefined variable '" + node[1] + "' found!")
-                return 0
-
-        if node[0] == 'fun_def':
-            self.env[node[1]] = node[2]
-
-        if node[0] == 'fun_call':
-            try:
-                return self.walkTree(self.env[node[1]])
-            except LookupError:
-                print("Undefined function '%s'" % node[1])
-                return 0
-
-        if node[0] == 'add':
-            return self.walkTree(node[1]) + self.walkTree(node[2])
-        elif node[0] == 'sub':
-            return self.walkTree(node[1]) - self.walkTree(node[2])
-        elif node[0] == 'mul':
-            return self.walkTree(node[1]) * self.walkTree(node[2])
-        elif node[0] == 'div':
-            return self.walkTree(node[1]) / self.walkTree(node[2])
-        elif node[0] == 'mod':
-            return self.walkTree(node[1]) % self.walkTree(node[2])
-
-        if node[0] == 'min':
-            return min(self.walkTree(node[1]), self.walkTree(node[2]))
-        elif node[0] == 'max':
-            return max(self.walkTree(node[1]), self.walkTree(node[2]))
-
-        if node[0] == 'decrement_int':
-            number = self.walkTree(node[1])
-            decrement = self.walkTree(node[2])
-            toReturn = number - decrement
-            return toReturn
-        elif node[0] == 'decrement_var':
-            try:
-                number = self.env[node[1]]
-            except LookupError:
-                print("Undefined variable '" + node[1] + "' found!")
-                return 0
-            decrement = self.walkTree(node[2])
-            toReturn = number - decrement
-            return toReturn
-
-        if node[0] == 'increment_int':
-            number = self.walkTree(node[1])
-            decrement = self.walkTree(node[2])
-            toReturn = number + decrement
-            return toReturn
-        elif node[0] == 'increment_var':
-            try:
-                number = self.env[node[1]]
-            except LookupError:
-                print("Undefined variable '" + node[1] + "' found!")
-                return 0
-            decrement = self.walkTree(node[2])
-            toReturn = number + decrement
-            return toReturn
+        elif node[0] == 'printline':
+            print(self.walkTree(node[1]))
+            print()
 
         if node[0] == 'input':
             self.env[node[1]] = input()
@@ -415,44 +314,93 @@ class ExecuteLOL:
             self.env[node[1]] = self.walkTree(node[2])
             return node[1]
 
-        if node[0] == 'var_assign':
+        if node[0] == 'var_dec':
+            if node[1] not in self.env:
+                self.env[node[1]] = None
+            else:
+                raise Exception("Multiple declaration of identifier: %s" % node[1])
+
+        if node[0] == 'assign':
             try:
                 self.env[node[1]] = self.walkTree(node[2])
                 return self.env[node[1]]
             except LookupError:
-                print("Undefined variable '" + node[1] + "' found!")
+                print("Undefined variable '"+node[1]+"' found!")
+
+        if node[0] == 'convert':
+            if node[2] == 'YARN':
+                self.env[node[1]] = str(self.env[node[1]])
+            elif node[2] == 'NUMBR':
+                self.env[node[1]] = int(self.env[node[1]])
+            elif node[2] == 'NUMBAR':
+                self.env[node[1]] = float(self.env[node[1]])
+            else:
+                raise Exception("Cannot convert identifier: %s to type %s" % (node[1], node[2]))
+
+        if node[0] == 'if':
+            if self.walkTree(node[1]):
+                return self.walkTree(node[2])
+        elif node[0] == 'elif':
+            if self.walkTree(node[1]):
+                return self.walkTree(node[2])
+            return self.walkTree(node[3])
+
+        if node[0] == 'loop':
+            try:
+                while True:
+                    self.walkTree(node[2])
+            except Break:
+                pass
+
+        if node[0] == 'break':
+            raise Break()
+
+        if node[0] == 'func_def':
+            if node[1] in self.env:
+                print("Invalid - Name already taken")
                 return 0
+            self.env[node[1]] = node[2]
+
+        if node[0] == 'func_call':
+            try:
+                return self.walkTree(self.env[node[1]])
+            except LookupError:
+                print("Undefined function '%s'" % node[1])
+
+        if node[0] == 'return':
+            return self.walkTree(node[1])
+
+        if node[0] == 'not':
+            return not self.walkTree(node[1])
+
+        if node[0] == 'bin_op':
+            if node[1] == 'SUM OF':
+                return self.walkTree(node[2]) + self.walkTree(node[3])
+            elif node[1] == 'DIFF OF':
+                return self.walkTree(node[2]) - self.walkTree(node[3])
+            elif node[1] == 'PRODUKT OF':
+                return self.walkTree(node[2]) * self.walkTree(node[3])
+            elif node[1] == 'QUOSHUNT OF':
+                return self.walkTree(node[2]) / self.walkTree(node[3])
+            elif node[1] == 'MOD OF':
+                return self.walkTree(node[2]) % self.walkTree(node[3])
+            elif node[1] == 'BIGGR OF':
+                return max(self.walkTree(node[2]), self.walkTree(node[3]))
+            elif node[1] == 'SMALLR OF':
+                return min(self.walkTree(node[2]), self.walkTree(node[3]))
+            elif node[1] == 'WON OF':
+                return self.walkTree(node[2]) ** self.walkTree(node[3])
+            elif node[1] == 'BOTH SAEM':
+                return self.walkTree(node[2]) == self.walkTree(node[3])
+            elif node[1] == 'DIFFRINT':
+                return self.walkTree(node[2]) != self.walkTree(node[3])
 
         if node[0] == 'var':
             try:
                 return self.env[node[1]]
             except LookupError:
-                print("Undefined variable '" + node[1] + "' found!")
+                print("Undefined variable '"+node[1]+"' found!")
                 return 0
-
-        if node[0] == 'for_loop':
-            if node[1][0] == 'for_loop_setup':
-                loop_setup = self.walkTree(node[1])
-
-                loop_count = self.env[loop_setup[0]]
-                loop_limit = loop_setup[1]
-
-                for i in range(loop_count + 1, loop_limit + 1):
-                    res = self.walkTree(node[2])
-                    if res is not None:
-                        print(res)
-                    self.env[loop_setup[0]] = i
-                del self.env[loop_setup[0]]
-
-        if node[0] == 'for_loop_setup':
-            return (self.walkTree(node[1]), self.walkTree(node[2]))
-
-        if node[0] == 'ret':
-            return (self.walkTree(node[1]))
-
-        if node[0] == 'end':
-            print("end")
-            sys.exit()
 
 if __name__ == '__main__':
     lexer = LexerLOL()
