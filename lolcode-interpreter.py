@@ -1,3 +1,16 @@
+"""
+Izaaq bin Ahmad Izham - k19011071
+Final Year Project - LOLCODE Interpreter
+
+LOLCODE originally by Adam Lindsay - http://www.lolcode.org/
+Uses SLY library for lexing and parsing - https://sly.readthedocs.io/en/latest/sly.html
+
+LOLCODE Syntax - https://gist.github.com/sharmaeklavya2/8a0e2581baf969be0f64
+
+
+CAN I HAZ FIRST CLASS?
+"""
+
 from sly import Lexer
 from sly import Parser
 import sys
@@ -54,8 +67,8 @@ class LexerLOL(Lexer):
         EOL,
     }
 
-    ignore = ' \t'  # ignore whitespace
-    ignore_comment = r'BTW\s[^\n]*'
+    ignore = ' \t'  # ignore whitespace and indentation
+    ignore_comment = r'BTW\s[^\n]*'   # ignore anything after BTW, comment code
     literals = { '!' }
 
     # Define tokens as regular expressions, stored as raw strings
@@ -115,10 +128,10 @@ class LexerLOL(Lexer):
         t.value = int(t.value)
         return t
 
-    @_(r'("|\')(?:[^:"\']|::|:"|:\')*("|\')')
+    @_(r'\".*?\"')
     def STRING(self, t):
-        # convert into python string
-        t.value = str(t.value)
+        # convert into python string - remove double quotes
+        t.value = str(t.value).strip('"')
         return t
 
     @_(r'(?:WIN)|(?:FAIL)')
@@ -154,6 +167,11 @@ class ParserLOL(Parser):
     def __init__(self):
         self.env = {}
 
+    @_('HAI EOL statement_list KTHXBYE',
+       'HAI EOL statement_list KTHXBYE EOL')
+    def program(self, p):
+        return
+
     @_('')
     def statement(self, p):
         pass
@@ -162,12 +180,9 @@ class ParserLOL(Parser):
     def statement(self, p):
         return p.expr
 
-    @_('VISIBLE expr "!"',
-       'VISIBLE expr')
+    @_('VISIBLE expr')
     def statement(self, p):
-        if len(p) == 3:
-            return ('print', p.expr)
-        return ('printline', p.expr)
+        return ('print', p.expr)
 
     @_('GIMMEH IDENTIFIER')
     def statement(self, p):
@@ -178,7 +193,7 @@ class ParserLOL(Parser):
     def statement(self, p):
         if len(p) == 4:
             return ('var_def', p.IDENTIFIER, p.expr)
-        return ('var_dec', p.IDENTIFIER)
+        return ('var_declare', p.IDENTIFIER)
 
     @_('IDENTIFIER R expr')
     def statement(self, p):
@@ -193,11 +208,8 @@ class ParserLOL(Parser):
     def statement(self, p):
         if len(p) == 5:
             return ('if', p.expr, p.statement)
-        return ('if_else', p.expr, p.statement0, p.statement1)
-
-    # @_('O_RLY expr YA_RLY statement NO_WAI statement OIC')  # update to include EOL tokens + statement list
-    # def statement(self, p):
-    #     return ('if_else', p.expr, p.statement0, p.statement1)
+        else:
+            return ('elif', p.expr, ('branch', p.statement0, p.statement1))
 
     @_('IM_IN_YR IDENTIFIER statement IM_OUTTA_YR IDENTIFIER')  # update to include EOL tokens + statement list
     def statement(self, p):
@@ -230,11 +242,14 @@ class ParserLOL(Parser):
        'MOD_OF expr AN expr',
        'BIGGR_OF expr AN expr',
        'SMALLR_OF expr AN expr',
-       'WON_OF expr AN expr',
-       'BOTH_SAEM expr AN expr',
-       'DIFFRINT expr AN expr')
+       'WON_OF expr AN expr')
     def expr(self, p):
         return ('bin_op', p[0], p.expr0, p.expr1)
+
+    @_('BOTH_SAEM expr AN expr',
+       'DIFFRINT expr AN expr')
+    def expr(self, p):
+        return ('equality_check', p[0], p.expr0, p.expr1)
 
     @_('FLOAT')
     def expr(self, p):
@@ -246,7 +261,7 @@ class ParserLOL(Parser):
 
     @_('STRING')                    # update to include SMOOSH
     def expr(self, p):
-        return ('string', p.STRING)
+        return ('str', p.STRING)
 
     @_('IDENTIFIER')
     def expr(self, p):
@@ -267,7 +282,7 @@ class ExecuteLOL:
     def __init__(self, tree, env):
         self.env = env
         result = self.walkTree(tree)
-        if result is not None and isinstance(result, int):
+        if result is not None and isinstance(result, int) or isinstance(result, float):
             print(result)
         if isinstance(result, str) and result[0] == '"':
             print(result)
@@ -286,8 +301,10 @@ class ExecuteLOL:
 
         if node[0] == 'program':
             if node[1] is None:
+                print("node 1 is none")
                 self.walkTree(node[2])
             else:
+                print("node 1 not none - moving")
                 self.walkTree(node[1])
                 self.walkTree(node[2])
 
@@ -302,9 +319,6 @@ class ExecuteLOL:
 
         if node[0] == 'print':
             print(self.walkTree(node[1]))
-        elif node[0] == 'printline':
-            print(self.walkTree(node[1]))
-            print()
 
         if node[0] == 'input':
             self.env[node[1]] = input()
@@ -314,24 +328,28 @@ class ExecuteLOL:
             self.env[node[1]] = self.walkTree(node[2])
             return node[1]
 
-        if node[0] == 'var_dec':
+        if node[0] == 'var_declare':
             if node[1] not in self.env:
                 self.env[node[1]] = None
             else:
-                raise Exception("Multiple declaration of identifier: %s" % node[1])
+                raise Exception("NAEM '%s' ALREDDEH TAKEN YA DUMMEH" % node[1])
 
         if node[0] == 'assign':
             try:
                 self.env[node[1]] = self.walkTree(node[2])
                 return self.env[node[1]]
             except LookupError:
-                print("Undefined variable '"+node[1]+"' found!")
+                print("WHAT THE HELL IS A '%s'?!?!" % node[1])
 
         if node[0] == 'convert':
             if node[2] == 'YARN':
                 self.env[node[1]] = str(self.env[node[1]])
             elif node[2] == 'NUMBR':
-                self.env[node[1]] = int(self.env[node[1]])
+                try:
+                    self.env[node[1]] = int(self.env[node[1]])
+                except ValueError:
+                    print("")
+
             elif node[2] == 'NUMBAR':
                 self.env[node[1]] = float(self.env[node[1]])
             else:
@@ -342,8 +360,8 @@ class ExecuteLOL:
                 return self.walkTree(node[2])
         elif node[0] == 'elif':
             if self.walkTree(node[1]):
-                return self.walkTree(node[2])
-            return self.walkTree(node[3])
+                return self.walkTree(node[2][1])
+            return self.walkTree(node[2][2])
 
         if node[0] == 'loop':
             try:
@@ -357,7 +375,7 @@ class ExecuteLOL:
 
         if node[0] == 'func_def':
             if node[1] in self.env:
-                print("Invalid - Name already taken")
+                print("MAEK A NEW NAEM PLZ !!11")
                 return 0
             self.env[node[1]] = node[2]
 
@@ -365,7 +383,7 @@ class ExecuteLOL:
             try:
                 return self.walkTree(self.env[node[1]])
             except LookupError:
-                print("Undefined function '%s'" % node[1])
+                print("NO SUCH THING AS A '%s'" % node[1])
 
         if node[0] == 'return':
             return self.walkTree(node[1])
@@ -374,6 +392,9 @@ class ExecuteLOL:
             return not self.walkTree(node[1])
 
         if node[0] == 'bin_op':
+            if isinstance(self.walkTree(node[2]), str) or isinstance(self.walkTree(node[3]), str):
+                print("UHOH!!!! NO YARN ALLOWED!!!!")
+                return 0
             if node[1] == 'SUM OF':
                 return self.walkTree(node[2]) + self.walkTree(node[3])
             elif node[1] == 'DIFF OF':
@@ -384,13 +405,11 @@ class ExecuteLOL:
                 return self.walkTree(node[2]) / self.walkTree(node[3])
             elif node[1] == 'MOD OF':
                 return self.walkTree(node[2]) % self.walkTree(node[3])
-            elif node[1] == 'BIGGR OF':
-                return max(self.walkTree(node[2]), self.walkTree(node[3]))
-            elif node[1] == 'SMALLR OF':
-                return min(self.walkTree(node[2]), self.walkTree(node[3]))
             elif node[1] == 'WON OF':
                 return self.walkTree(node[2]) ** self.walkTree(node[3])
-            elif node[1] == 'BOTH SAEM':
+
+        if node[0] == 'equality_check':
+            if node[1] == 'BOTH SAEM':
                 return self.walkTree(node[2]) == self.walkTree(node[3])
             elif node[1] == 'DIFFRINT':
                 return self.walkTree(node[2]) != self.walkTree(node[3])
@@ -399,7 +418,7 @@ class ExecuteLOL:
             try:
                 return self.env[node[1]]
             except LookupError:
-                print("Undefined variable '"+node[1]+"' found!")
+                print("WHAT THE HELL IS A '%s'?!?!" % node[1])
                 return 0
 
 if __name__ == '__main__':
