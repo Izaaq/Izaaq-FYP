@@ -157,20 +157,21 @@ class LexerLOL(Lexer):
 class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LexerLOL.tokens
-    # setting precedence of binary tokens + unary negative operator
-    # precedence = (
-    #     ('left', "SUM_OF", "DIFF_OF"),
-    #     ('left', "PRODUKT_OF", "QUOSHUNT_OF"),
-    #     ('right', 'UMINUS'),
-    # )
 
     def __init__(self):
         self.env = {}
 
-    @_('HAI EOL statement_list KTHXBYE',
-       'HAI EOL statement_list KTHXBYE EOL')
+    @_('HAI EOL statement_list KTHXBYE')
     def program(self, p):
-        return
+        return ('start', p.statement_list)
+
+    @_('statement_list statement EOL',
+       'statement EOL')
+    def statement_list(self, p):
+        if len(p) == 3:
+            return (p[0] + [p[1]])
+        else:
+            return ([p[0]])
 
     @_('')
     def statement(self, p):
@@ -180,9 +181,12 @@ class ParserLOL(Parser):
     def statement(self, p):
         return p.expr
 
-    @_('VISIBLE expr')
+    @_('VISIBLE expr "!"',
+       'VISIBLE expr')
     def statement(self, p):
-        return ('print', p.expr)
+        if len(p) == 3:
+            return ('print', p.expr)
+        return ('printline', p.expr)
 
     @_('GIMMEH IDENTIFIER')
     def statement(self, p):
@@ -203,25 +207,25 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('convert', p.IDENTIFIER, p.TYPE)
 
-    @_('O_RLY expr YA_RLY statement OIC',
-       'O_RLY expr YA_RLY statement NO_WAI statement OIC')  # update to include EOL tokens + statement list
+    @_('O_RLY expr EOL YA_RLY EOL statement_list OIC',
+       'O_RLY expr EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')  # update to include EOL tokens + statement list
     def statement(self, p):
-        if len(p) == 5:
-            return ('if', p.expr, p.statement)
+        if len(p) == 7:
+            return ('if', p.expr, p.statement_list)
         else:
-            return ('elif', p.expr, ('branch', p.statement0, p.statement1))
+            return ('else', p.expr, ('branch', p.statement_list0, p.statement_list1))
 
-    @_('IM_IN_YR IDENTIFIER statement IM_OUTTA_YR IDENTIFIER')  # update to include EOL tokens + statement list
+    @_('IM_IN_YR IDENTIFIER EOL statement_list IM_OUTTA_YR IDENTIFIER')  # update to include EOL tokens + statement list
     def statement(self, p):
-        return ('loop', p.IDENTIFIER0, p.statement, p.IDENTIFIER1)
+        return ('loop', p.IDENTIFIER0, p.statement_list, p.IDENTIFIER1)
 
     @_('GTFO')
     def statement(self, p):
         return ('break')
 
-    @_('HOW_IZ_I IDENTIFIER statement IF_U_SAY_SO')  # update to include EOL tokens + statement list + arg list
+    @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')  # update to include EOL tokens + statement list + arg list
     def statement(self, p):
-        return ('func_def', p.IDENTIFIER, p.statement)
+        return ('func_def', p.IDENTIFIER, p.statement_list)
 
     @_('I_IZ IDENTIFIER MKAY')
     def statement(self, p):
@@ -272,6 +276,7 @@ class ParserLOL(Parser):
         sys.exit()
 
 class Break(Exception):
+    print("Class 'Break' reached")
     pass
 
 class Return(Exception):
@@ -282,10 +287,24 @@ class ExecuteLOL:
     def __init__(self, tree, env):
         self.env = env
         result = self.walkTree(tree)
-        if result is not None and isinstance(result, int) or isinstance(result, float):
+        if result is not None and isinstance(result, int):
+            print(result)
+        if result is not None and isinstance(result, float):
             print(result)
         if isinstance(result, str) and result[0] == '"':
             print(result)
+
+    def executeStatements(self, statements):
+        if statements:
+            try:
+                for statement in statements:
+                    self.walkTree(statement)
+            except Break:
+                raise Break
+            except Return:
+                raise Return
+            except Exception as e:
+                raise e
 
     def walkTree(self, node):
 
@@ -304,7 +323,9 @@ class ExecuteLOL:
                 print("node 1 is none")
                 self.walkTree(node[2])
             else:
-                print("node 1 not none - moving")
+                print("node 1 not none")
+                print(node[1])
+                print(node[2])
                 self.walkTree(node[1])
                 self.walkTree(node[2])
 
@@ -318,6 +339,8 @@ class ExecuteLOL:
             return node[1]
 
         if node[0] == 'print':
+            print(self.walkTree(node[1]), end='')
+        elif node[0] == 'printline':
             print(self.walkTree(node[1]))
 
         if node[0] == 'input':
@@ -342,36 +365,45 @@ class ExecuteLOL:
                 print("WHAT THE HELL IS A '%s'?!?!" % node[1])
 
         if node[0] == 'convert':
+            try:
+                self.env[node[1]]
+            except KeyError:
+                raise Exception("Variable '%s' doesn't exist." % node[1])
             if node[2] == 'YARN':
                 self.env[node[1]] = str(self.env[node[1]])
             elif node[2] == 'NUMBR':
                 try:
                     self.env[node[1]] = int(self.env[node[1]])
                 except ValueError:
-                    print("")
+                    raise Exception("Invalid string to convert to int")
 
             elif node[2] == 'NUMBAR':
-                self.env[node[1]] = float(self.env[node[1]])
+                try:
+                    self.env[node[1]] = float(self.env[node[1]])
+                except ValueError:
+                    raise Exception("Invalid string to convert to float")
             else:
                 raise Exception("Cannot convert identifier: %s to type %s" % (node[1], node[2]))
 
         if node[0] == 'if':
             if self.walkTree(node[1]):
-                return self.walkTree(node[2])
-        elif node[0] == 'elif':
+                self.executeStatements(node[2])
+        elif node[0] == 'else':
             if self.walkTree(node[1]):
-                return self.walkTree(node[2][1])
-            return self.walkTree(node[2][2])
+                self.executeStatements(node[2][1])
+            else:
+                self.executeStatements(node[2][2])
+
+        if node[0] == 'break':
+            print("break")
+            raise Break()
 
         if node[0] == 'loop':
             try:
                 while True:
-                    self.walkTree(node[2])
+                    self.executeStatements(node[2])
             except Break:
-                pass
-
-        if node[0] == 'break':
-            raise Break()
+                raise Break()
 
         if node[0] == 'func_def':
             if node[1] in self.env:
@@ -381,7 +413,7 @@ class ExecuteLOL:
 
         if node[0] == 'func_call':
             try:
-                return self.walkTree(self.env[node[1]])
+                self.executeStatements(self.env[node[1]])
             except LookupError:
                 print("NO SUCH THING AS A '%s'" % node[1])
 
@@ -421,6 +453,10 @@ class ExecuteLOL:
                 print("WHAT THE HELL IS A '%s'?!?!" % node[1])
                 return 0
 
+        if node[0] == 'start':
+            print(node[1])
+            self.executeStatements(node[1])
+
 if __name__ == '__main__':
     lexer = LexerLOL()
     parser = ParserLOL()
@@ -437,4 +473,5 @@ if __name__ == '__main__':
             # for token in lex:
             #     print(token)
             tree = parser.parse(lex)
+            # print(tree)
             ExecuteLOL(tree, env)
