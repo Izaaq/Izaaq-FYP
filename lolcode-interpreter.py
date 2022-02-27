@@ -9,6 +9,11 @@ LOLCODE Syntax - https://gist.github.com/sharmaeklavya2/8a0e2581baf969be0f64
 
 
 CAN I HAZ FIRST CLASS?
+
+simple programs it can do:
+print sequentially from 0 to 10:
+HAI, I HAS A VAR ITZ 0, IM IN YR LOOP, VAR R SUM OF VAR AN 1, VISIBLE VAR, O RLY BOTH SAEM VAR AN 10, YA RLY, GTFO, OIC, IM OUTTA YR LOOP, KTHXBYE
+
 """
 
 from sly import Lexer
@@ -221,7 +226,7 @@ class ParserLOL(Parser):
 
     @_('GTFO')
     def statement(self, p):
-        return ('break')
+        return ('break', p[0])
 
     @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')  # update to include EOL tokens + statement list + arg list
     def statement(self, p):
@@ -271,12 +276,7 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('var', p.IDENTIFIER)
 
-    @_('KTHXBYE')
-    def statement(self, p):
-        sys.exit()
-
 class Break(Exception):
-    print("Class 'Break' reached")
     pass
 
 class Return(Exception):
@@ -316,6 +316,7 @@ class ExecuteLOL:
             return node
 
         if node is None:
+            print("whole node is None")
             return None
 
         if node[0] == 'program':
@@ -394,16 +395,15 @@ class ExecuteLOL:
             else:
                 self.executeStatements(node[2][2])
 
-        if node[0] == 'break':
-            print("break")
-            raise Break()
-
         if node[0] == 'loop':
             try:
                 while True:
                     self.executeStatements(node[2])
             except Break:
-                raise Break()
+                pass
+
+        if node[0] == 'break':
+            raise Break()
 
         if node[0] == 'func_def':
             if node[1] in self.env:
@@ -454,7 +454,6 @@ class ExecuteLOL:
                 return 0
 
         if node[0] == 'start':
-            print(node[1])
             self.executeStatements(node[1])
 
 if __name__ == '__main__':
