@@ -2,11 +2,13 @@ HAI
 GIMMEH PARAM
 PARAM IS NOW A NUMBR
 HOW IZ I FIBONACCI
-    O RLY BOTH SAEM PARAM AN 0
+    BOTH SAEM PARAM AN 0
+    O RLY?
         YA RLY
             VISIBLE 0
     OIC
-    O RLY BOTH SAEM PARAM AN 1
+    BOTH SAEM PARAM AN 1
+    O RLY?
         YA RLY
             VISIBLE 1
     OIC
@@ -19,7 +21,8 @@ HOW IZ I FIBONACCI
         M R SUM OF F1 AN F2
         F2 R F1
         F1 R M
-        O RLY BOTH SAEM INDEX AN PARAM
+        BOTH SAEM INDEX AN PARAM
+        O RLY?
             YA RLY
                 GTFO
             NO WAI

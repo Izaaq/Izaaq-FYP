@@ -76,7 +76,7 @@ class LexerLOL(Lexer):
 
     ignore = ' \t'  # ignore whitespace and indentation
     ignore_comment = r'BTW\s[^\n]*'   # ignore anything after BTW, comment code
-    literals = { '!' }
+    literals = { '!', '?' }
 
     # Define regex for tokens to be recognized in input
     I_HAS_A         = r'I\s+HAS\s+A\b'
@@ -221,10 +221,10 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('convert', p.IDENTIFIER, p.TYPE)
 
-    @_('O_RLY expr EOL YA_RLY EOL statement_list OIC',
-       'O_RLY expr EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')
+    @_('expr EOL O_RLY "?" EOL YA_RLY EOL statement_list OIC',
+       'expr EOL O_RLY "?" EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')
     def statement(self, p):
-        if len(p) == 7:
+        if len(p) == 9:
             return ('if', p.expr, p.statement_list)
         else:
             return ('if-else', p.expr, ('branch', p.statement_list0, p.statement_list1))
@@ -276,6 +276,11 @@ class ParserLOL(Parser):
     @_('INTEGER')
     def expr(self, p):
         return ('int', p.INTEGER)
+
+    @_('BOOLEAN')
+    def expr(self, p):
+        print(p.BOOLEAN)
+        return ('bool', p.BOOLEAN)
 
     @_('STRING')                    # update to include SMOOSH
     def expr(self, p):
@@ -350,6 +355,8 @@ class ExecuteLOL:
             return node
         if isinstance(node, float):
             return node
+        if isinstance(node, bool):
+            return node
 
         if node is None:
             return None
@@ -372,6 +379,9 @@ class ExecuteLOL:
             return node[1]
 
         if node[0] == 'str':
+            return node[1]
+
+        if node[0] == 'bool':
             return node[1]
 
         if node[0] == 'print':
@@ -406,7 +416,7 @@ class ExecuteLOL:
                 except ValueError:
                     raise Exception("YARN IS NOT A NUMBAR!!11.1")
             else:
-                raise Exception("Cannot convert identifier '%s' to type %s" % (node[1], node[2]))
+                raise Exception(f"Cannot convert identifier '{node[1]}' to type {node[2]}")
 
         if node[0] == 'if':
             if self.walkTree(node[1]):
