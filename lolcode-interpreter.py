@@ -4,22 +4,17 @@ Final Year Project - LOLCODE Interpreter
 
 LOLCODE originally by Adam Lindsay - http://www.lolcode.org/
 Uses SLY library for lexing and parsing - https://sly.readthedocs.io/en/latest/sly.html
-
 LOLCODE Syntax - https://gist.github.com/sharmaeklavya2/8a0e2581baf969be0f64
-
 
 CAN I HAZ FIRST CLASS?
 
 simple programs it can do:
 print sequentially from 0 to 10:
 HAI, I HAS A VAR ITZ 0, IM IN YR LOOP, VAR R SUM OF VAR AN 1, VISIBLE VAR, O RLY BOTH SAEM VAR AN 10, YA RLY, GTFO, OIC, IM OUTTA YR LOOP, KTHXBYE
-
 """
 
 from sly import Lexer
 from sly import Parser
-import sys
-import types
 
 class LexerLOL(Lexer):
     tokens = {
@@ -213,14 +208,14 @@ class ParserLOL(Parser):
         return ('convert', p.IDENTIFIER, p.TYPE)
 
     @_('O_RLY expr EOL YA_RLY EOL statement_list OIC',
-       'O_RLY expr EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')  # update to include EOL tokens + statement list
+       'O_RLY expr EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')
     def statement(self, p):
         if len(p) == 7:
             return ('if', p.expr, p.statement_list)
         else:
             return ('else', p.expr, ('branch', p.statement_list0, p.statement_list1))
 
-    @_('IM_IN_YR IDENTIFIER EOL statement_list IM_OUTTA_YR IDENTIFIER')  # update to include EOL tokens + statement list
+    @_('IM_IN_YR IDENTIFIER EOL statement_list IM_OUTTA_YR IDENTIFIER')
     def statement(self, p):
         return ('loop', p.IDENTIFIER0, p.statement_list, p.IDENTIFIER1)
 
@@ -228,7 +223,7 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('break', p[0])
 
-    @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')  # update to include EOL tokens + statement list + arg list
+    @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')  # update to include arg list
     def statement(self, p):
         return ('func_def', p.IDENTIFIER, p.statement_list)
 
@@ -306,6 +301,27 @@ class ExecuteLOL:
             except Exception as e:
                 raise e
 
+    # return value of variable
+    def getVariable(self, name):
+        try:
+            return self.env[name]
+        except KeyError:
+            raise Exception("DA FAWK IS A '%s'???" % name)
+
+    # set value of variable
+    def setVariable(self, name, value):
+        if name in self.env:
+            self.env[name] = value
+        else:
+            raise Exception("DA FAWK IS A '%s'???" % name)
+
+    # make a new variable
+    def declareVariable(self, name):
+        if name not in self.env:
+            self.env[name] = None
+        else:
+            raise Exception("NAEM '%s' ALREDDEH TAKEN!!" % name)
+
     def walkTree(self, node):
 
         if isinstance(node, int):
@@ -316,7 +332,6 @@ class ExecuteLOL:
             return node
 
         if node is None:
-            print("whole node is None")
             return None
 
         if node[0] == 'program':
@@ -345,46 +360,33 @@ class ExecuteLOL:
             print(self.walkTree(node[1]))
 
         if node[0] == 'input':
-            self.env[node[1]] = input()
-            return node[1]
+            self.env[node[1]] = input("GIB INPUT!!!11: ")
 
         if node[0] == 'var_def':
-            self.env[node[1]] = self.walkTree(node[2])
-            return node[1]
+            self.declareVariable(node[1])
+            self.setVariable(node[1], self.walkTree(node[2]))
 
         if node[0] == 'var_declare':
-            if node[1] not in self.env:
-                self.env[node[1]] = None
-            else:
-                raise Exception("NAEM '%s' ALREDDEH TAKEN YA DUMMEH" % node[1])
+            self.declareVariable(node[1])
 
         if node[0] == 'assign':
-            try:
-                self.env[node[1]] = self.walkTree(node[2])
-                return self.env[node[1]]
-            except LookupError:
-                print("WHAT THE HELL IS A '%s'?!?!" % node[1])
+            self.setVariable(node[1], self.walkTree(node[2]))
 
         if node[0] == 'convert':
-            try:
-                self.env[node[1]]
-            except KeyError:
-                raise Exception("Variable '%s' doesn't exist." % node[1])
-            if node[2] == 'YARN':
-                self.env[node[1]] = str(self.env[node[1]])
+            if node[2] == 'YARN':    # YARN for str, NUMBR for int, NUMBAR for float
+                self.setVariable(node[1], str(self.getVariable(node[1])))
             elif node[2] == 'NUMBR':
                 try:
-                    self.env[node[1]] = int(self.env[node[1]])
+                    self.setVariable(node[1], int(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("Invalid string to convert to int")
-
+                    raise Exception("YARN IS NOT A NUMBR!!11")
             elif node[2] == 'NUMBAR':
                 try:
-                    self.env[node[1]] = float(self.env[node[1]])
+                    self.setVariable(node[1], float(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("Invalid string to convert to float")
+                    raise Exception("YARN IS NOT A NUMBAR!!11.1")
             else:
-                raise Exception("Cannot convert identifier: %s to type %s" % (node[1], node[2]))
+                raise Exception("Cannot convert identifier '%s' to type %s" % (node[1], node[2]))
 
         if node[0] == 'if':
             if self.walkTree(node[1]):
@@ -406,10 +408,8 @@ class ExecuteLOL:
             raise Break()
 
         if node[0] == 'func_def':
-            if node[1] in self.env:
-                print("MAEK A NEW NAEM PLZ !!11")
-                return 0
-            self.env[node[1]] = node[2]
+            self.declareVariable(node[1])
+            self.setVariable(node[1], node[2])
 
         if node[0] == 'func_call':
             try:
@@ -425,9 +425,8 @@ class ExecuteLOL:
 
         if node[0] == 'bin_op':
             if isinstance(self.walkTree(node[2]), str) or isinstance(self.walkTree(node[3]), str):
-                print("UHOH!!!! NO YARN ALLOWED!!!!")
-                return 0
-            if node[1] == 'SUM OF':
+                raise Exception("UHOH!!!! NO YARN ALLOWED!!!!")
+            elif node[1] == 'SUM OF':
                 return self.walkTree(node[2]) + self.walkTree(node[3])
             elif node[1] == 'DIFF OF':
                 return self.walkTree(node[2]) - self.walkTree(node[3])
@@ -447,11 +446,7 @@ class ExecuteLOL:
                 return self.walkTree(node[2]) != self.walkTree(node[3])
 
         if node[0] == 'var':
-            try:
-                return self.env[node[1]]
-            except LookupError:
-                print("WHAT THE HELL IS A '%s'?!?!" % node[1])
-                return 0
+            return self.getVariable(node[1])
 
         if node[0] == 'start':
             self.executeStatements(node[1])
@@ -459,18 +454,37 @@ class ExecuteLOL:
 if __name__ == '__main__':
     lexer = LexerLOL()
     parser = ParserLOL()
-    env = {}                # context table
+    env = {}
 
-    while True:
-        try:
-            text = input('LOL > ')
-        except EOFError:
-            break
+    try:
+        with open('fib.lolcode') as f:
+            lines = f.readlines()
+    except EOFError:
+        raise Exception("EOF error")
 
-        if text:
-            lex = lexer.tokenize(text)
-            # for token in lex:
-            #     print(token)
-            tree = parser.parse(lex)
-            # print(tree)
-            ExecuteLOL(tree, env)
+    if lines:
+        lex = lexer.tokenize(''.join(lines))
+        tree = parser.parse(lex)
+        ExecuteLOL(tree, env)
+
+# if __name__ == '__main__':
+#     lexer = LexerLOL()
+#     parser = ParserLOL()
+#     env = {}                # context table
+#
+#     while True:
+#         try:
+#             text = input('LOL > ')
+#         except EOFError:
+#             break
+#
+#         if text:
+#             lex = lexer.tokenize(text)
+#             # for token in lex:
+#             #     print(token)
+#             tree = parser.parse(lex)
+#             print("tree")
+#             print(tree)
+#             print("environment")
+#             print(env)
+#             ExecuteLOL(tree, env)
