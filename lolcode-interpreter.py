@@ -496,18 +496,26 @@ if __name__ == '__main__':
     parser = ParserLOL()
     env = {}
 
+    while True:
+        print("Current files are 'fib' and 'example'.")
+        file = input("Enter file name (must end in .lolcode): ")
+        if not file.endswith('.lolcode'):
+            print("File must end with '.lolcode'")
+        else:
+            break
+
     try:
-        with open('fib.lolcode') as f:
+        with open(file) as f:
             lines = f.readlines()
+    except FileNotFoundError:
+        raise Exception("Error - File not found")
     except EOFError:
         raise Exception("EOF error")
 
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
-        print(tree)
         execute = ExecuteLOL(tree, env)
-        print(execute.env)
 
 """
 LOLCODE console - only one line, so must use ',' as EOL token
