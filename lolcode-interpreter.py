@@ -8,14 +8,21 @@ LOLCODE Syntax - https://gist.github.com/sharmaeklavya2/8a0e2581baf969be0f64
 
 CAN I HAZ FIRST CLASS?
 
-simple programs it can do:
-print sequentially from 0 to 10:
-HAI, I HAS A VAR ITZ 0, IM IN YR LOOP, VAR R SUM OF VAR AN 1, VISIBLE VAR, O RLY BOTH SAEM VAR AN 10, YA RLY, GTFO, OIC, IM OUTTA YR LOOP, KTHXBYE
+TO-DO:
+- implement boolean
+- get "FOUND YR"/return to work
+- allow functions to take parameters
+- maybe "ANY OF", "ALL OF", "EITHER OF", "BOTH OF"
+- maybe type casting?
+- maybe switch case?
 """
 
 from sly import Lexer
 from sly import Parser
 
+"""
+Lexer class - Makes tokens using inputs
+"""
 class LexerLOL(Lexer):
     tokens = {
         IDENTIFIER,
@@ -71,7 +78,7 @@ class LexerLOL(Lexer):
     ignore_comment = r'BTW\s[^\n]*'   # ignore anything after BTW, comment code
     literals = { '!' }
 
-    # Define tokens as regular expressions, stored as raw strings
+    # Define regex for tokens to be recognized in input
     I_HAS_A         = r'I\s+HAS\s+A\b'
     ITZ             = r'ITZ\b'
     R               = r'R\b'
@@ -154,6 +161,9 @@ class LexerLOL(Lexer):
     def ignore_newline(self, t):
         self.lineno += t.value.count('\n')
 
+"""
+Parser class - Define grammar 
+"""
 class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LexerLOL.tokens
@@ -161,7 +171,11 @@ class ParserLOL(Parser):
     def __init__(self):
         self.env = {}
 
-    @_('HAI EOL statement_list KTHXBYE')
+    # define grammar
+
+    # programs must start with 'HAI' and end with 'KTHXBYE'
+    @_('HAI EOL statement_list KTHXBYE',
+       'HAI EOL statement_list KTHXBYE EOL')
     def program(self, p):
         return ('start', p.statement_list)
 
@@ -213,7 +227,7 @@ class ParserLOL(Parser):
         if len(p) == 7:
             return ('if', p.expr, p.statement_list)
         else:
-            return ('else', p.expr, ('branch', p.statement_list0, p.statement_list1))
+            return ('if-else', p.expr, ('branch', p.statement_list0, p.statement_list1))
 
     @_('IM_IN_YR IDENTIFIER EOL statement_list IM_OUTTA_YR IDENTIFIER')
     def statement(self, p):
@@ -231,7 +245,7 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('func_call', p.IDENTIFIER)
 
-    @_('FOUND_YR expr')
+    @_('FOUND_YR expr')  # update for working functionality
     def statement(self, p):
         return ('return', p.expr)
 
@@ -277,6 +291,10 @@ class Break(Exception):
 class Return(Exception):
     pass
 
+"""
+Execute class 
+Responsible for functionality
+"""
 class ExecuteLOL:
 
     def __init__(self, tree, env):
@@ -289,6 +307,7 @@ class ExecuteLOL:
         if isinstance(result, str) and result[0] == '"':
             print(result)
 
+    # execute every statement in statement list
     def executeStatements(self, statements):
         if statements:
             try:
@@ -322,6 +341,7 @@ class ExecuteLOL:
         else:
             raise Exception("NAEM '%s' ALREDDEH TAKEN!!" % name)
 
+    # recursively walk AST
     def walkTree(self, node):
 
         if isinstance(node, int):
@@ -373,7 +393,7 @@ class ExecuteLOL:
             self.setVariable(node[1], self.walkTree(node[2]))
 
         if node[0] == 'convert':
-            if node[2] == 'YARN':    # YARN for str, NUMBR for int, NUMBAR for float
+            if node[2] == 'YARN':
                 self.setVariable(node[1], str(self.getVariable(node[1])))
             elif node[2] == 'NUMBR':
                 try:
@@ -391,12 +411,13 @@ class ExecuteLOL:
         if node[0] == 'if':
             if self.walkTree(node[1]):
                 self.executeStatements(node[2])
-        elif node[0] == 'else':
+        elif node[0] == 'if-else':
             if self.walkTree(node[1]):
                 self.executeStatements(node[2][1])
             else:
                 self.executeStatements(node[2][2])
 
+        # LOLCODE - loops execute forever until 'GTFO' reached.
         if node[0] == 'loop':
             try:
                 while True:
@@ -451,6 +472,9 @@ class ExecuteLOL:
         if node[0] == 'start':
             self.executeStatements(node[1])
 
+"""
+LOLCODE file reader - file must exist in same directory 
+"""
 if __name__ == '__main__':
     lexer = LexerLOL()
     parser = ParserLOL()
@@ -467,6 +491,9 @@ if __name__ == '__main__':
         tree = parser.parse(lex)
         ExecuteLOL(tree, env)
 
+"""
+LOLCODE console - only one line, so must use ',' as EOL token
+"""
 # if __name__ == '__main__':
 #     lexer = LexerLOL()
 #     parser = ParserLOL()
