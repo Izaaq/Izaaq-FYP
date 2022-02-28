@@ -259,13 +259,15 @@ class ParserLOL(Parser):
        'QUOSHUNT_OF expr AN expr',
        'MOD_OF expr AN expr',
        'BIGGR_OF expr AN expr',
-       'SMALLR_OF expr AN expr',
-       'WON_OF expr AN expr')
+       'SMALLR_OF expr AN expr')
     def expr(self, p):
         return ('bin_op', p[0], p.expr0, p.expr1)
 
-    @_('BOTH_SAEM expr AN expr',
-       'DIFFRINT expr AN expr')
+    @_('BOTH_SAEM expr AN expr',   # ==
+       'DIFFRINT expr AN expr',    # !=
+       'WON_OF expr AN expr',      # xor
+       'BOTH_OF expr AN expr',     # and
+       'EITHER_OF expr AN expr')   # or
     def expr(self, p):
         return ('equality_check', p[0], p.expr0, p.expr1)
 
@@ -467,14 +469,18 @@ class ExecuteLOL:
                 return self.walkTree(node[2]) / self.walkTree(node[3])
             elif node[1] == 'MOD OF':
                 return self.walkTree(node[2]) % self.walkTree(node[3])
-            elif node[1] == 'WON OF':
-                return self.walkTree(node[2]) ** self.walkTree(node[3])
 
         if node[0] == 'equality_check':
             if node[1] == 'BOTH SAEM':
                 return self.walkTree(node[2]) == self.walkTree(node[3])
             elif node[1] == 'DIFFRINT':
                 return self.walkTree(node[2]) != self.walkTree(node[3])
+            elif node[1] == 'WON OF':
+                return self.walkTree(node[2]) ^ self.walkTree(node[3])
+            elif node[1] == 'BOTH OF':
+                return self.walkTree(node[2]) and self.walkTree(node[3])
+            elif node[1] == 'EITHER OF':
+                return self.walkTree(node[2]) or self.walkTree(node[3])
 
         if node[0] == 'var':
             return self.getVariable(node[1])
@@ -499,7 +505,9 @@ if __name__ == '__main__':
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
-        ExecuteLOL(tree, env)
+        print(tree)
+        execute = ExecuteLOL(tree, env)
+        print(execute.env)
 
 """
 LOLCODE console - only one line, so must use ',' as EOL token
