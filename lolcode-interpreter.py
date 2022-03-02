@@ -242,7 +242,7 @@ class ParserLOL(Parser):
         return ('func_def', p.IDENTIFIER, p.statement_list)
 
     @_('I_IZ IDENTIFIER MKAY')
-    def statement(self, p):
+    def expr(self, p):
         return ('func_call', p.IDENTIFIER)
 
     @_('FOUND_YR expr')  # update for working functionality
@@ -332,21 +332,21 @@ class ExecuteLOL:
         try:
             return self.env[name]
         except KeyError:
-            raise Exception("DA FAWK IS A '%s'???" % name)
+            raise Exception(f"DA FAWK IS A '{name}'???")
 
     # set value of variable
     def setVariable(self, name, value):
         if name in self.env:
             self.env[name] = value
         else:
-            raise Exception("DA FAWK IS A '%s'???" % name)
+            raise Exception(f"DA FAWK IS A '{name}'???")
 
     # make a new variable
     def declareVariable(self, name):
         if name not in self.env:
             self.env[name] = None
         else:
-            raise Exception("NAEM '%s' ALREDDEH TAKEN!!" % name)
+            raise Exception(f"NAEM '{name}' ALREDDEH TAKEN!!")
 
     # recursively walk AST
     def walkTree(self, node):
@@ -392,7 +392,7 @@ class ExecuteLOL:
             print(self.walkTree(node[1]))
 
         if node[0] == 'input':
-            self.env[node[1]] = input("GIB INPUT!!!11: ")
+            self.env[node[1]] = input()
 
         if node[0] == 'var_def':
             self.declareVariable(node[1])
@@ -445,13 +445,23 @@ class ExecuteLOL:
             self.setVariable(node[1], node[2])
 
         if node[0] == 'func_call':
+            function = self.getVariable(node[1])
             try:
-                self.executeStatements(self.env[node[1]])
+                self.env['ret'] = None
+                self.executeStatements(function)
             except LookupError:
-                print("NO SUCH THING AS A '%s'" % node[1])
+                print(f"NO SUCH THING AS A '{node[1]}'")
+            except Break:
+                ret = None
+            except Return:
+                ret = self.getVariable('ret')
+            finally:
+                self.env.popitem()
+            return ret
 
         if node[0] == 'return':
-            return self.walkTree(node[1])
+            self.setVariable('ret', self.walkTree(node[1]))
+            raise Return()
 
         if node[0] == 'not':
             return not self.walkTree(node[1])
@@ -486,6 +496,7 @@ class ExecuteLOL:
             return self.getVariable(node[1])
 
         if node[0] == 'start':
+            self.env['ret'] = None
             self.executeStatements(node[1])
 
 """
