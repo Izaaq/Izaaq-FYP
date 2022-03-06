@@ -2,6 +2,7 @@ from lexer import LexerLOL
 from parser import ParserLOL
 import os
 
+# Meta classes
 class Break(Exception):
     pass
 
@@ -12,7 +13,7 @@ class Return(Exception):
 Execute class 
 Responsible for functionality
 """
-class ExecuteLOL:
+class InterpreterLOL:
 
     def __init__(self, tree, env):
         self.env = env

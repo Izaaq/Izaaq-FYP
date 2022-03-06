@@ -1,6 +1,6 @@
-from lexer import LexerLOL
-from parser import ParserLOL
-from interpreter import ExecuteLOL
+from lol.lexer import LexerLOL
+from lol.parser import ParserLOL
+from lol.interpreter import InterpreterLOL
 import os
 
 """
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
-        execute = ExecuteLOL(tree, env)
+        execute = InterpreterLOL(tree, env)
 
 """
 LOLCODE console - only one line, so must use ',' as EOL token
@@ -57,4 +57,4 @@ LOLCODE console - only one line, so must use ',' as EOL token
 #             tree = parser.parse(lex)
 #             # print(tree)
 #             # print(env)
-#             ExecuteLOL(tree, env)
+#             InterpreterLOL(tree, env)
