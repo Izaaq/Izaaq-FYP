@@ -59,12 +59,18 @@ class ParserLOL(Parser):
         return ('convert', p.IDENTIFIER, p.TYPE)
 
     @_('expr EOL O_RLY "?" EOL YA_RLY EOL statement_list OIC',
-       'expr EOL O_RLY "?" EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC')
+       'expr EOL O_RLY "?" EOL YA_RLY EOL statement_list NO_WAI EOL statement_list OIC',
+       'expr EOL O_RLY "?" EOL YA_RLY EOL statement_list MEBBE expr EOL statement_list OIC',
+       'expr EOL O_RLY "?" EOL YA_RLY EOL statement_list MEBBE expr EOL statement_list NO_WAI EOL statement_list OIC')
     def statement(self, p):
         if len(p) == 9:
             return ('if', p.expr, p.statement_list)
-        else:
+        elif len(p) == 12:
             return ('if-else', p.expr, ('branch', p.statement_list0, p.statement_list1))
+        elif len(p) == 13:
+            return ('if-elif', p.expr0, p.statement_list0, p.expr1, p.statement_list1)
+        else:
+            return ('if-elif-else', p.expr0, p.statement_list0, p.expr1, p.statement_list1, p.statement_list2)
 
     @_('IM_IN_YR IDENTIFIER EOL statement_list IM_OUTTA_YR IDENTIFIER')
     def statement(self, p):

@@ -35,6 +35,7 @@ class LexerLOL(Lexer):
         DIFFRINT,
         O_RLY,
         YA_RLY,
+        MEBBE,
         NO_WAI,
         IM_IN_YR,
         IM_OUTTA_YR,
@@ -84,6 +85,7 @@ class LexerLOL(Lexer):
     DIFFRINT        = r'DIFFRINT\b'
     O_RLY           = r'O\s+RLY\b'
     YA_RLY          = r'YA\s+RLY\b'
+    MEBBE           = r'MEBBE\b'
     NO_WAI          = r'NO\s+WAI\b'
     IM_IN_YR        = r'IM\s+IN\s+YR\b'
     IM_OUTTA_YR     = r'IM\s+OUTTA\s+YR\b'

@@ -166,6 +166,18 @@ class InterpreterLOL:
                 self.executeStatements(node[2][1])
             else:
                 self.executeStatements(node[2][2])
+        elif node[0] == 'if-elif':
+            if self.walkTree(node[1]):
+                self.executeStatements(node[2])
+            elif self.walkTree(node[3]):
+                self.executeStatements(node[4])
+        elif node[0] == 'if-elif-else':
+            if self.walkTree(node[1]):
+                self.executeStatements(node[2])
+            elif self.walkTree(node[3]):
+                self.executeStatements(node[4])
+            else:
+                self.executeStatements(node[5])
 
         # LOLCODE - loops execute forever until 'GTFO' reached.
         if node[0] == 'loop':
