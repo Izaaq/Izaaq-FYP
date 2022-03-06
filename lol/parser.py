@@ -1,5 +1,5 @@
 from sly import Parser
-from lexer import LexerLOL
+from lol.lexer import LexerLOL
 
 class ParserLOL(Parser):
     # tokens are passed from lexer to parser

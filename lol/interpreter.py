@@ -1,5 +1,5 @@
-from lexer import LexerLOL
-from parser import ParserLOL
+from lol.lexer import LexerLOL
+from lol.parser import ParserLOL
 import os
 
 # Meta classes
