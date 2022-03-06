@@ -7,11 +7,10 @@ FYP Repository for Izaaq Ahmad Izham's final year project.
 **Supervisor:**   &nbsp;&nbsp;Mr Laurence Tratt<br/>
 
 ## To use:
-- Launch 'lolcode-interpreter.py'
-- If using file-read mode, enter name of file to be executed (must exist in directory and end in .lolcode)
-- If using console mode, enter each command, however it is treated as a file still, so you must include the whole program 
+- Launch 'lolcode-shell.py'
+- Enter name of file to be executed 
 
 ## Credits:
 
 [LOLCODE](http://www.lolcode.org/) originally by Adam Lindsay<br/>
-Uses [SLY](https://sly.readthedocs.io/en/latest/sly.html) library for lexing and parsing 
+Uses [SLY](https://sly.readthedocs.io/en/latest/sly.html) library for lexing and parsing<br/>
