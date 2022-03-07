@@ -4,7 +4,7 @@ FYP Repository for Izaaq Ahmad Izham's final year project.
 
 **Uni:**          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;King's College London<br/>
 **K-Number:**     &nbsp;&nbsp;k19011071<br/>
-**Supervisor:**   &nbsp;&nbsp;Mr Laurence Tratt<br/>
+**Supervisor:**   &nbsp;Mr Laurence Tratt<br/>
 
 ## To use:
 - Launch 'lolcode-shell.py'
