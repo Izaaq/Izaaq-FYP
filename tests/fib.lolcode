@@ -3,15 +3,10 @@ HOW IZ I FIBONACCI
     VISIBLE "Enter index of fibonacci: "
     GIMMEH PARAM
     PARAM IS NOW A NUMBR
+
     BOTH SAEM PARAM AN 0
-    O RLY?
-        YA RLY
-            FOUND YR 0
-    OIC
-    BOTH SAEM PARAM AN 1
-    O RLY?
-        YA RLY
-            FOUND YR 1
+    O RLY?, YA RLY, FOUND YR 0
+    MEBBE BOTH SAEM PARAM AN 1, FOUND YR 1
     OIC
 
     I HAS A F2 ITZ 0
@@ -32,7 +27,5 @@ HOW IZ I FIBONACCI
     IM OUTTA YR LOOP
     FOUND YR F1
 IF U SAY SO
-I HAS A VAR ITZ I IZ FIBONACCI MKAY
-VISIBLE "Value of fibonacci at index you specified is "!
-VISIBLE VAR
+VISIBLE I IZ FIBONACCI MKAY
 KTHXBYE

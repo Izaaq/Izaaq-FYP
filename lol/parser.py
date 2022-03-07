@@ -1,3 +1,7 @@
+"""
+Parser class -
+"""
+
 from sly import Parser
 from lol.lexer import LexerLOL
 
@@ -5,11 +9,7 @@ class ParserLOL(Parser):
     # tokens are passed from lexer to parser
     tokens = LexerLOL.tokens
 
-    def __init__(self):
-        self.env = {}
-
     # define grammar
-
     # programs must start with 'HAI' and end with 'KTHXBYE'
     @_('HAI EOL statement_list KTHXBYE',
        'HAI EOL statement_list KTHXBYE EOL')

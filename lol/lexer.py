@@ -1,3 +1,8 @@
+"""
+LOLCODE lexer - define tokens and their regex so they are recognised on input.
+Also handles any special behaviour for certain tokens (ie, must remove quotes from string)
+"""
+
 from sly import Lexer
 
 class LexerLOL(Lexer):
@@ -10,8 +15,6 @@ class LexerLOL(Lexer):
         I_HAS_A,
         ITZ,
         R,
-        MAEK,
-        A,
         IS_NOW_A,
         TYPE,
         VISIBLE,
@@ -52,17 +55,14 @@ class LexerLOL(Lexer):
         EOL
     }
 
-    ignore = ' \t'  # ignore whitespace and indentation
-    ignore_comment = r'BTW\s[^\n]*'   # ignore anything after BTW, comment code
+    ignore = '\t '  # ignore whitespace and indentation
     literals = { '!', '?' }
 
     # Define regex for tokens to be recognized in input
     I_HAS_A         = r'I\s+HAS\s+A\b'
     ITZ             = r'ITZ\b'
     R               = r'R\b'
-    MAEK            = r'MAEK\b'
     IS_NOW_A        = r'IS\s+NOW\s+A\b'
-    A               = r'A\b'
     TYPE            = r'((?:NUMBA?R)|(?:YARN)|(?:TROOF)|(?:NOOB))\b'
     VISIBLE         = r'VISIBLE\b'
     GIMMEH          = r'GIMMEH\b'

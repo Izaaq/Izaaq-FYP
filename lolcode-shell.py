@@ -1,3 +1,9 @@
+"""
+LOLCODE shell - To be run for code to work.
+
+Izaaq bin Ahmad Izham - k19011071
+"""
+
 from lol.lexer import LexerLOL
 from lol.parser import ParserLOL
 from lol.interpreter import InterpreterLOL
@@ -17,13 +23,12 @@ if __name__ == '__main__':
             files.remove(file)
 
     while True:
-        print("Here are valid files: ")
+        print("Valid files:")
         print(files)
         file = input("Enter file name (don't include .lolcode): ")
         file = file + ".lolcode"
-        print(file)
         if file not in files:
-            print("No such file found.")
+            print("No such file found")
         else:
             break
 
@@ -38,25 +43,4 @@ if __name__ == '__main__':
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
-        execute = InterpreterLOL(tree, env)
-
-"""
-LOLCODE console - only one line, so must use ',' as EOL token
-"""
-# if __name__ == '__main__':
-#     lexer = LexerLOL()
-#     parser = ParserLOL()
-#     env = {}                # context table
-#
-#     while True:
-#         try:
-#             text = input('LOL > ')
-#         except EOFError:
-#             break
-#
-#         if text:
-#             lex = lexer.tokenize(text)
-#             tree = parser.parse(lex)
-#             # print(tree)
-#             # print(env)
-#             InterpreterLOL(tree, env)
+        InterpreterLOL(tree, env)
