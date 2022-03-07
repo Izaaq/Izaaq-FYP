@@ -1,6 +1,6 @@
 HAI
 HOW IZ I factorial
-    VISIBLE "GIMMEH n!! "
+    VISIBLE "GIMMEH FACTORIAL!!! "
     GIMMEH n
     n IS NOW A NUMBR
     I HAS A prod ITZ 1
@@ -17,6 +17,8 @@ HOW IZ I factorial
     FOUND YR prod
 IF U SAY SO
 
-VISIBLE I IZ factorial MKAY
+I HAS A RESULT ITZ I IZ factorial MKAY
+VISIBLE "FEKTORIAL IZ "!
+VISIBLE RESULT
 
 KTHXBYE

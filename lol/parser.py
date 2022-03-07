@@ -66,7 +66,7 @@ class ParserLOL(Parser):
         if len(p) == 9:
             return ('if', p.expr, p.statement_list)
         elif len(p) == 12:
-            return ('if-else', p.expr, ('branch', p.statement_list0, p.statement_list1))
+            return ('if-else', p.expr, p.statement_list0, p.statement_list1)
         elif len(p) == 13:
             return ('if-elif', p.expr0, p.statement_list0, p.expr1, p.statement_list1)
         else:

@@ -163,9 +163,9 @@ class InterpreterLOL:
                 self.executeStatements(node[2])
         elif node[0] == 'if-else':
             if self.walkTree(node[1]):
-                self.executeStatements(node[2][1])
+                self.executeStatements(node[2])
             else:
-                self.executeStatements(node[2][2])
+                self.executeStatements(node[3])
         elif node[0] == 'if-elif':
             if self.walkTree(node[1]):
                 self.executeStatements(node[2])

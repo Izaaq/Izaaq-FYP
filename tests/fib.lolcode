@@ -1,6 +1,6 @@
 HAI
 HOW IZ I FIBONACCI
-    VISIBLE "ENTER DUH FIB INDEX!!: "
+    VISIBLE "Enter index of fibonacci: "
     GIMMEH PARAM
     PARAM IS NOW A NUMBR
     BOTH SAEM PARAM AN 0
@@ -33,5 +33,6 @@ HOW IZ I FIBONACCI
     FOUND YR F1
 IF U SAY SO
 I HAS A VAR ITZ I IZ FIBONACCI MKAY
+VISIBLE "Value of fibonacci at index you specified is "!
 VISIBLE VAR
 KTHXBYE

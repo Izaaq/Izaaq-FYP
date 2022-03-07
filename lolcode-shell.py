@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser = ParserLOL()
     env = {}  # context table
 
-    files = os.listdir()
+    files = os.listdir('tests')
     for file in files[:]:
         if not file.endswith('.lolcode'):
             files.remove(file)
@@ -19,14 +19,16 @@ if __name__ == '__main__':
     while True:
         print("Here are valid files: ")
         print(files)
-        file = input("Enter file name (must include .lolcode): ")
+        file = input("Enter file name (don't include .lolcode): ")
+        file = file + ".lolcode"
+        print(file)
         if file not in files:
             print("No such file found.")
         else:
             break
 
     try:
-        with open(file) as f:
+        with open("tests\\" + file) as f:
             lines = f.readlines()
     except FileNotFoundError:
         raise Exception("Error - File not found")
