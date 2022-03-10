@@ -7,6 +7,8 @@ BOTH SAEM X AN Z
 O RLY?
     YA RLY
         VISIBLE "THEN"
+    MEBBE BOTH SAEM Y AN Z
+        VISIBLE "ELIF"
     NO WAI
         VISIBLE "ELSE"
 OIC

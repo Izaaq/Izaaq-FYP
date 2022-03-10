@@ -30,9 +30,6 @@ class LexerLOL(Lexer):
         EITHER_OF,
         WON_OF,
         NOT,
-        ALL_OF,
-        ANY_OF,
-        SMOOSH,
         MKAY,
         BOTH_SAEM,
         DIFFRINT,
@@ -47,7 +44,6 @@ class LexerLOL(Lexer):
         KTHXBYE,
         HOW_IZ_I,
         I_IZ,
-        YR,
         AN,
         FOUND_YR,
         IF_U_SAY_SO,
@@ -77,9 +73,6 @@ class LexerLOL(Lexer):
     EITHER_OF       = r'EITHER\s+OF\b'
     WON_OF          = r'WON\s+OF\b'
     NOT             = r'NOT\b'
-    ALL_OF          = r'ALL\s+OF\b'
-    ANY_OF          = r'ANY\s+OF\b'
-    SMOOSH          = r'SMOOSH\s+\b'
     MKAY            = r'MKAY\b'
     BOTH_SAEM       = r'BOTH\s+SAEM\b'
     DIFFRINT        = r'DIFFRINT\b'
@@ -94,7 +87,6 @@ class LexerLOL(Lexer):
     KTHXBYE         = r'KTHXBYE\b'
     HOW_IZ_I        = r'HOW\s+IZ\s+I\b'
     I_IZ            = r'I\s+IZ\b'
-    YR              = r'YR\b'
     AN              = r'AN\b'
     FOUND_YR        = r'FOUND\s+YR\b'
     IF_U_SAY_SO     = r'IF\s+U\s+SAY\s+SO\b'

@@ -8,7 +8,7 @@ HOW IZ I factorial
     IM IN YR LOOP
         BOTH SAEM i AN n
         O RLY?, YA RLY, GTFO, OIC
-        prod R PRODUKT OF prod AN SUM OF i AN 1
+        prod R PRODUKT OF prod AN SUM OF i AN 1      BTW python equivalent: prod = prod * (i + 1)
         i R SUM OF i AN 1
     IM OUTTA YR LOOP
     FOUND YR prod

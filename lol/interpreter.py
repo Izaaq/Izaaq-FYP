@@ -10,8 +10,8 @@ class Return(Exception):
     pass
 
 """
-Execute class 
-Responsible for functionality
+Interpreter
+Responsible for functionality and logic of the language 
 """
 class InterpreterLOL:
 
@@ -45,7 +45,7 @@ class InterpreterLOL:
         try:
             return self.env[name]
         except KeyError:
-            raise Exception(f"DA FAWK IS A '{name}'???")
+            raise Exception(f"Error - No variable named '{name}'")
 
     # set value of variable
     def setVariable(self, name, value):
@@ -57,20 +57,21 @@ class InterpreterLOL:
             else:
                 self.env[name] = value
         else:
-            raise Exception(f"DA FAWK IS A '{name}'???")
+            raise Exception(f"Error - No variable named '{name}'???")
 
     # make a new variable
     def declareVariable(self, name):
         if name not in self.env:
             self.env[name] = None
         else:
-            raise Exception(f"NAEM '{name}' ALREDDEH TAKEN!!")
+            raise Exception(f"Name '{name}' already taken.")
 
+    # delete variable - really only for 'return' to work as intended
     def deleteVariable(self, name):
         try:
             self.env.pop(name)
         except KeyError:
-            raise Exception("No such variable")
+            raise Exception(f"Error - No variable named '{name}'???")
 
     # recursively walk AST
     def walkTree(self, node):
@@ -81,22 +82,11 @@ class InterpreterLOL:
             return node
         if isinstance(node, float):
             return node
-        # if isinstance(node, bool):
-        #     return node
+        if isinstance(node, bool):
+            return node
 
         if node is None:
             return None
-
-        if node[0] == 'program':
-            if node[1] is None:
-                print("node 1 is none")
-                self.walkTree(node[2])
-            else:
-                print("node 1 not none")
-                print(node[1])
-                print(node[2])
-                self.walkTree(node[1])
-                self.walkTree(node[2])
 
         elif node[0] == 'int':
             return node[1]
@@ -110,6 +100,7 @@ class InterpreterLOL:
         elif node[0] == 'bool':
             return node[1]
 
+        # want the code to output "WIN" if expr == True, and "FAIL" if false.
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
             if isinstance(toPrint, bool):
@@ -149,12 +140,12 @@ class InterpreterLOL:
                 try:
                     self.setVariable(node[1], int(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("YARN IS NOT A NUMBR!!11")
+                    raise Exception("Cannot convert this string to int.")
             elif node[2] == 'NUMBAR':
                 try:
                     self.setVariable(node[1], float(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("YARN IS NOT A NUMBAR!!11.1")
+                    raise Exception("Cannot convert this string to float.")
             else:
                 raise Exception(f"Cannot convert identifier '{node[1]}' to type {node[2]}")
 
@@ -200,7 +191,7 @@ class InterpreterLOL:
                 self.declareVariable('ret')
                 self.executeStatements(function)
             except LookupError:
-                print(f"NO SUCH THING AS A '{node[1]}'")
+                print(f"No function named '{node[1]}'")
             except Break:
                 ret = None
             except Return:
@@ -218,7 +209,7 @@ class InterpreterLOL:
 
         elif node[0] == 'bin_op':
             if isinstance(self.walkTree(node[2]), str) or isinstance(self.walkTree(node[3]), str):
-                raise Exception("UHOH!!!! NO YARN ALLOWED!!!!")
+                raise Exception("Error - Strings cannot be used")
             elif node[1] == 'SUM OF':
                 return self.walkTree(node[2]) + self.walkTree(node[3])
             elif node[1] == 'DIFF OF':

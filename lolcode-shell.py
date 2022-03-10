@@ -10,7 +10,7 @@ from lol.interpreter import InterpreterLOL
 import os
 
 """
-LOLCODE file reader - file must exist in same directory 
+LOLCODE file reader - file must exist in 'tests' directory and end in '.lolcode'.
 """
 if __name__ == '__main__':
     lexer = LexerLOL()
@@ -43,4 +43,8 @@ if __name__ == '__main__':
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
+        # for token in lex:       # debugging
+        #     print(token)
+        # print(tree)
         InterpreterLOL(tree, env)
+        # print(env)
