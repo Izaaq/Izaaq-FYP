@@ -19,14 +19,14 @@ if __name__ == '__main__':
 
     files = os.listdir('tests')
     for file in files[:]:
-        if not file.endswith('.lolcode'):
+        if not file.endswith('.lol'):
             files.remove(file)
 
     while True:
         print("Valid files:")
         print(files)
-        file = input("Enter file name (don't include .lolcode): ")
-        file = file + ".lolcode"
+        file = input("Enter file name (don't include .lol): ")
+        file = file + ".lol"
         if file not in files:
             print("No such file found")
         else:
