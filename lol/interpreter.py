@@ -1,8 +1,6 @@
-from lol.lexer import LexerLOL
-from lol.parser import ParserLOL
-import os
-
-# Meta classes
+"""
+Metaclasses - Mainly needed for "GTFO" and "FOUND YR" to work as intended.
+"""
 class Break(Exception):
     pass
 
