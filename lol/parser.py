@@ -1,5 +1,5 @@
 """
-Parser class - Organises tokens and specifies grammar rules.
+Parser class - Organises tokens and specifies grammar rules. bruh
 """
 
 from sly import Parser
