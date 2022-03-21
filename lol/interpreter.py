@@ -35,7 +35,7 @@ class InterpreterLOL:
         try:
             return self.env[name]
         except KeyError:
-            raise Exception(f"Error - No variable named '{name} found.'")
+            raise Exception(f"Error - No variable named '{name}' found.'")
 
     def setVariable(self, name, value):
         if name in self.env:
@@ -72,10 +72,11 @@ class InterpreterLOL:
             return node[1]
 
         elif node[0] == 'bool':
-            if node[1] == 'WIN':
-                return True
-            else:
-                return False
+            return node[1]
+            # if node[1] == 'WIN':
+            #     return True
+            # else:
+            #     return False
 
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
@@ -149,11 +150,38 @@ class InterpreterLOL:
 
         # LOLCODE - loops execute forever until 'GTFO' reached.
         elif node[0] == 'loop':
+            if node[1] != node[3]:
+                raise Exception("Error - Loop opener and closer must have same name.")
             try:
                 while True:
                     self.executeStatements(node[2])
             except Break:
                 pass
+
+        elif node[0] == 'counted_loop':
+            if node[1] != node[7]:
+                raise Exception("Error - Loop opener and closer must have same name.")
+            change = 1
+            if node[2] == 'decrement':
+                change = -1
+            if node[4] == 'TIL':
+                try:
+                    index = self.getVariable(node[3])
+                    while not self.walkTree(node[5]):
+                        index += change
+                        self.setVariable(node[3], index)
+                        self.executeStatements(node[6])
+                except Break:
+                    pass
+            elif node[4] == 'WILE':
+                try:
+                    index = self.getVariable(node[3])
+                    while self.walkTree(node[5]):
+                        index += change
+                        self.setVariable(node[3], index)
+                        self.executeStatements(node[6])
+                except Break:
+                    pass
 
         elif node[0] == 'break':
             raise Break()
