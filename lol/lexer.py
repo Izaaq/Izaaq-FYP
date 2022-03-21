@@ -42,8 +42,6 @@ class LexerLOL(Lexer):
         IM_IN_YR,
         IM_OUTTA_YR,
         YR,
-        TIL,
-        WILE,
         GTFO,
         HAI,
         KTHXBYE,
