@@ -73,10 +73,6 @@ class InterpreterLOL:
 
         elif node[0] == 'bool':
             return node[1]
-            # if node[1] == 'WIN':
-            #     return True
-            # else:
-            #     return False
 
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
