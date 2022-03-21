@@ -7,6 +7,8 @@ from sly import Lexer
 
 class LexerLOL(Lexer):
     tokens = {
+        LOOPERATOR,
+        LOOPCONDITION,
         IDENTIFIER,
         STRING,
         INTEGER,
@@ -39,6 +41,9 @@ class LexerLOL(Lexer):
         NO_WAI,
         IM_IN_YR,
         IM_OUTTA_YR,
+        YR,
+        TIL,
+        WILE,
         GTFO,
         HAI,
         KTHXBYE,
@@ -82,6 +87,7 @@ class LexerLOL(Lexer):
     NO_WAI          = r'NO\s+WAI\b'
     IM_IN_YR        = r'IM\s+IN\s+YR\b'
     IM_OUTTA_YR     = r'IM\s+OUTTA\s+YR\b'
+    YR              = r'YR\b'
     GTFO            = r'GTFO\b'
     HAI             = r'HAI\b'
     KTHXBYE         = r'KTHXBYE\b'
@@ -113,6 +119,11 @@ class LexerLOL(Lexer):
 
     @_(r'(?:WIN)|(?:FAIL)')
     def BOOLEAN(self, t):
+        if t.value == 'WIN':
+            t.value = True
+        elif t.value == 'FAIL':
+            t.value = False
+
         return t
 
     @_(r'BTW\s[^\n]*')
@@ -124,6 +135,18 @@ class LexerLOL(Lexer):
         if t.value == '\n':
             self.lineno += 1
         t.value = 'EOL'
+        return t
+
+    @_(r'(?:UPPIN)|(?:NERFIN)')
+    def LOOPERATOR(self, t):
+        if t.value == 'UPPIN':
+            t.value = 'increment'
+        elif t.value == 'NERFIN':
+            t.value = 'decrement'
+        return t
+
+    @_(r'(?:TIL)|(?:WILE)')
+    def LOOPCONDITION(self, t):
         return t
 
     # Newline token
