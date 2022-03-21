@@ -42,9 +42,8 @@ if __name__ == '__main__':
 
     if lines:
         lex = lexer.tokenize(''.join(lines))
-        tree = parser.parse(lex)
-        # for token in lex:       # debugging
+        # for token in lex:       # debugging - show all tokens
         #     print(token)
-        # print(tree)
+        tree = parser.parse(lex)
         InterpreterLOL(tree, env)
-        # print(env)
+        # print(env)              # debugging - show all variables/functions

@@ -1,5 +1,5 @@
 """
-Parser class - Organises tokens and specifies grammar rules. bruh
+Parser class - Organises tokens and specifies grammar rules. 
 """
 
 from sly import Parser
@@ -80,7 +80,7 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('break', p[0])
 
-    @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')  # update to include arg list
+    @_('HOW_IZ_I IDENTIFIER EOL statement_list IF_U_SAY_SO')
     def statement(self, p):
         return ('func_def', p.IDENTIFIER, p.statement_list)
 
@@ -96,13 +96,13 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('not', p.expr)
 
-    @_('SUM_OF expr AN expr',
-       'DIFF_OF expr AN expr',
-       'PRODUKT_OF expr AN expr',
-       'QUOSHUNT_OF expr AN expr',
-       'MOD_OF expr AN expr',
-       'BIGGR_OF expr AN expr',
-       'SMALLR_OF expr AN expr')
+    @_('SUM_OF expr AN expr',       # +
+       'DIFF_OF expr AN expr',      # -
+       'PRODUKT_OF expr AN expr',   # *
+       'QUOSHUNT_OF expr AN expr',  # /
+       'MOD_OF expr AN expr',       # %
+       'BIGGR_OF expr AN expr',     # max()
+       'SMALLR_OF expr AN expr')    # min()
     def expr(self, p):
         return ('bin_op', p[0], p.expr0, p.expr1)
 
@@ -126,7 +126,7 @@ class ParserLOL(Parser):
     def expr(self, p):
         return ('bool', p.BOOLEAN)
 
-    @_('STRING')                    # update to include SMOOSH
+    @_('STRING')
     def expr(self, p):
         return ('str', p.STRING)
 

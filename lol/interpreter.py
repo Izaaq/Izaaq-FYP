@@ -14,16 +14,8 @@ Responsible for functionality and logic of the language
 class InterpreterLOL:
 
     def __init__(self, tree, env):
-        self.env = env
-        result = self.walkTree(tree)
-        if result is not None and isinstance(result, int):
-            print(result)
-        if result is not None and isinstance(result, float):
-            print(result)
-        if result is not None and isinstance(result, bool):
-            print(result)
-        if isinstance(result, str) and result[0] == '"':
-            print(result)
+        self.env = env          # environment to store variables and functions
+        self.walkTree(tree)     # recursively walk the parse tree
 
     # execute every statement in statement list
     def executeStatements(self, statements):
@@ -43,21 +35,15 @@ class InterpreterLOL:
         try:
             return self.env[name]
         except KeyError:
-            raise Exception(f"Error - No variable named '{name}'")
+            raise Exception(f"Error - No variable named '{name} found.'")
 
-    # set value of variable
     def setVariable(self, name, value):
         if name in self.env:
-            if value == 'WIN':
-                self.env[name] = True
-            elif value == 'FAIL':
-                self.env[name] = False
-            else:
-                self.env[name] = value
+            self.env[name] = value
         else:
-            raise Exception(f"Error - No variable named '{name}'???")
+            raise Exception(f"Error - No variable named '{name}' found.'")
 
-    # make a new variable
+    # make a new variable - value to None
     def declareVariable(self, name):
         if name not in self.env:
             self.env[name] = None
@@ -69,19 +55,9 @@ class InterpreterLOL:
         try:
             self.env.pop(name)
         except KeyError:
-            raise Exception(f"Error - No variable named '{name}'???")
+            raise Exception(f"Error - No variable named '{name}' found.")
 
-    # recursively walk AST
     def walkTree(self, node):
-
-        if isinstance(node, int):
-            return node
-        if isinstance(node, str):
-            return node
-        if isinstance(node, float):
-            return node
-        if isinstance(node, bool):
-            return node
 
         if node is None:
             return None
@@ -96,11 +72,14 @@ class InterpreterLOL:
             return node[1]
 
         elif node[0] == 'bool':
-            return node[1]
+            if node[1] == 'WIN':
+                return True
+            else:
+                return False
 
-        # want the code to output "WIN" if expr == True, and "FAIL" if false.
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
+            # print "WIN" if expr == True, and "FAIL" if false.
             if isinstance(toPrint, bool):
                 if toPrint:
                     print("WIN", end='')
@@ -186,7 +165,7 @@ class InterpreterLOL:
         elif node[0] == 'func_call':
             function = self.getVariable(node[1])
             try:
-                self.declareVariable('ret')
+                self.declareVariable('ret')         # make temporary variable for return variable
                 self.executeStatements(function)
             except LookupError:
                 print(f"No function named '{node[1]}'")
@@ -195,7 +174,7 @@ class InterpreterLOL:
             except Return:
                 ret = self.getVariable('ret')
             finally:
-                self.deleteVariable('ret')
+                self.deleteVariable('ret')          # delete variable - not needed
             return ret
 
         elif node[0] == 'return':
