@@ -76,6 +76,10 @@ class ParserLOL(Parser):
     def statement(self, p):
         return ('loop', p.IDENTIFIER0, p.statement_list, p.IDENTIFIER1)
 
+    @_('IM_IN_YR IDENTIFIER LOOPERATOR YR IDENTIFIER LOOPCONDITION expr EOL statement_list IM_OUTTA_YR IDENTIFIER')
+    def statement(self, p):
+        return ('counted_loop', p.IDENTIFIER0, p.LOOPERATOR, p.IDENTIFIER1, p.LOOPCONDITION, p.expr, p.statement_list, p.IDENTIFIER2)
+
     @_('GTFO')
     def statement(self, p):
         return ('break', p[0])
