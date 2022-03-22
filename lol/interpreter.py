@@ -120,6 +120,11 @@ class InterpreterLOL:
                     self.setVariable(node[1], float(self.getVariable(node[1])))
                 except ValueError:
                     raise Exception("Cannot convert this string to float.")
+            elif node[2] == 'TROOF':
+                try:
+                    self.setVariable(node[1], bool(self.getVariable(node[1])))
+                except ValueError:
+                    raise Exception(f"Cannot convert '{node[1]}' to boolean.")
             else:
                 raise Exception(f"Cannot convert identifier '{node[1]}' to type {node[2]}")
 
