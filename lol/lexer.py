@@ -62,7 +62,7 @@ class LexerLOL(Lexer):
     ITZ             = r'ITZ\b'
     R               = r'R\b'
     IS_NOW_A        = r'IS\s+NOW\s+A\b'
-    TYPE            = r'((?:NUMBA?R)|(?:YARN))\b'
+    TYPE            = r'((?:NUMBA?R)|(?:YARN)|(?:TROOF))\b'
     VISIBLE         = r'VISIBLE\b'
     GIMMEH          = r'GIMMEH\b'
     SUM_OF          = r'SUM\s+OF\b'
