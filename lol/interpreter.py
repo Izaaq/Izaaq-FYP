@@ -73,6 +73,10 @@ class InterpreterLOL:
 
         elif node[0] == 'bool':
             return node[1]
+            # if node[1] == 'WIN':
+            #     return True
+            # else:
+            #     return False
 
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
@@ -95,7 +99,8 @@ class InterpreterLOL:
                 print(toPrint)
 
         elif node[0] == 'input':
-            self.env[node[1]] = input()
+            self.declareVariable(node[1])
+            self.setVariable(node[1], input())
 
         elif node[0] == 'var_def':
             self.declareVariable(node[1])
@@ -107,26 +112,30 @@ class InterpreterLOL:
         elif node[0] == 'assign':
             self.setVariable(node[1], self.walkTree(node[2]))
 
+
         elif node[0] == 'convert':
             if node[2] == 'YARN':
-                self.setVariable(node[1], str(self.getVariable(node[1])))
+                try:
+                    self.setVariable(node[1], str(self.getVariable(node[1])))
+                except ValueError:
+                    raise Exception(f"Cannot convert {node[1]} to string.")
             elif node[2] == 'NUMBR':
                 try:
                     self.setVariable(node[1], int(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("Cannot convert this string to int.")
+                    raise Exception(f"Cannot convert identifier '{node[1]}' to integer.")
             elif node[2] == 'NUMBAR':
                 try:
                     self.setVariable(node[1], float(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception("Cannot convert this string to float.")
+                    raise Exception(f"Cannot convert identifier '{node[1]}' to float.")
             elif node[2] == 'TROOF':
                 try:
                     self.setVariable(node[1], bool(self.getVariable(node[1])))
                 except ValueError:
-                    raise Exception(f"Cannot convert '{node[1]}' to boolean.")
+                    raise Exception(f"Cannot convert identifier '{node[1]}' to boolean.")
             else:
-                raise Exception(f"Cannot convert identifier '{node[1]}' to type {node[2]}")
+                raise Exception(f"Type '{node[2]}' is not a defined data type.")
 
         elif node[0] == 'if':
             if self.walkTree(node[1]):
