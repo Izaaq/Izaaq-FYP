@@ -16,6 +16,7 @@ class ParserLOL(Parser):
     def program(self, p):
         return ('start', p.statement_list)
 
+    # allows for multi-line statements - inspired by michal zarlok
     @_('statement_list statement EOL',
        'statement EOL')
     def statement_list(self, p):
