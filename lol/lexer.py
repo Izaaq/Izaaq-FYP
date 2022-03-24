@@ -112,7 +112,7 @@ class LexerLOL(Lexer):
     @_(r'\".*?\"')
     def STRING(self, t):
         # convert into python string - remove double quotes
-        t.value = str(t.value).strip('"')
+        t.value = t.value.strip('"')
         return t
 
     @_(r'(?:WIN)|(?:FAIL)')
@@ -153,3 +153,7 @@ class LexerLOL(Lexer):
         self.lineno += t.value.count('\n')
 
     IDENTIFIER = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+    def error(self, t):
+        print(f"Line {self.lineno}: Bad character {t.value[0]}")
+        self.index += 1
