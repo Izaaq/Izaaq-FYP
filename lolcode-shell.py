@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     if lines:
         lex = lexer.tokenize(''.join(lines))
-        tree = parser.parse(tree)
+        tree = parser.parse(lex)
         InterpreterLOL(tree, env)
 
     ##### Used for performance results
