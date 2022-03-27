@@ -73,10 +73,6 @@ class InterpreterLOL:
 
         elif node[0] == 'bool':
             return node[1]
-            # if node[1] == 'WIN':
-            #     return True
-            # else:
-            #     return False
 
         elif node[0] == 'print':
             toPrint = self.walkTree(node[1])
@@ -172,11 +168,11 @@ class InterpreterLOL:
             if node[1] != node[7]:
                 raise Exception("Error - Loop opener and closer must have same name.")
             change = 1
+            index = self.getVariable(node[3])
             if node[2] == 'decrement':
                 change = -1
             if node[4] == 'TIL':
                 try:
-                    index = self.getVariable(node[3])
                     while not self.walkTree(node[5]):
                         index += change
                         self.setVariable(node[3], index)
@@ -185,7 +181,6 @@ class InterpreterLOL:
                     pass
             elif node[4] == 'WILE':
                 try:
-                    index = self.getVariable(node[3])
                     while self.walkTree(node[5]):
                         index += change
                         self.setVariable(node[3], index)

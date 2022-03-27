@@ -16,6 +16,7 @@ if __name__ == '__main__':
     parser = ParserLOL()
     env = {}  # context table
 
+    # filter out invalid files in 'tests' directory
     files = os.listdir('tests')
     for file in files[:]:
         if not file.endswith('.lol'):
@@ -40,12 +41,15 @@ if __name__ == '__main__':
         raise Exception("EOF error")
 
     if lines:
-        startTime = time.perf_counter()    #
         lex = lexer.tokenize(''.join(lines))
-        # for token in lex:       # debugging - show all tokens
-        #     print(token)
-        tree = parser.parse(lex)
+        tree = parser.parse(tree)
         InterpreterLOL(tree, env)
-        endTime = time.perf_counter()
-        print(f"Time taken: {endTime - startTime} seconds.")        # to measure time
-        print(env)              # debugging - show all variables/functions
+
+    ##### Used for performance results
+    # if lines:
+    #     startTime = time.perf_counter()
+    #     lex = lexer.tokenize(''.join(lines))
+    #     tree = parser.parse(lex)
+    #     InterpreterLOL(tree, env)
+    #     endTime = time.perf_counter()
+    #     print(f"Time taken: {endTime - startTime} seconds.")        # to measure time
