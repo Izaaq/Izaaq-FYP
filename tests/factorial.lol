@@ -1,4 +1,7 @@
 HAI
+
+BTW Factorial - Since functions can't take parameters, it prompts user for an input and uses loop for calculation.
+
 HOW IZ I factorial
     VISIBLE "Enter number: "
     GIMMEH n
