@@ -62,7 +62,7 @@ class LexerLOL(Lexer):
     ITZ             = r'ITZ\b'
     R               = r'R\b'
     IS_NOW_A        = r'IS\s+NOW\s+A\b'
-    TYPE            = r'((?:NUMBA?R)|(?:YARN)|(?:TROOF))\b'
+    TYPE            = r'((?:NUMBA?R)|(?:YARN)|(?:TROOF)|(?:NOOB))\b'
     VISIBLE         = r'VISIBLE\b'
     GIMMEH          = r'GIMMEH\b'
     SUM_OF          = r'SUM\s+OF\b'
@@ -155,5 +155,5 @@ class LexerLOL(Lexer):
     IDENTIFIER = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
     def error(self, t):
-        print(f"Line {self.lineno}: Bad character {t.value[0]}")
+        print(f"Line {self.lineno}: Bad character '{t.value[0]}'")
         self.index += 1

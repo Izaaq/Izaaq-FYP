@@ -11,7 +11,7 @@ import time
 """
 LOLCODE file reader - file must exist in 'tests' directory and end in '.lol'.
 """
-if __name__ == '__main__':
+def lolShell():
     lexer = LexerLOL()
     parser = ParserLOL()
     env = {}  # context table
@@ -44,6 +44,8 @@ if __name__ == '__main__':
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
         InterpreterLOL(tree, env)
+        print(env)
+
 
     ##### Used for performance results
     # if lines:
@@ -53,3 +55,6 @@ if __name__ == '__main__':
     #     InterpreterLOL(tree, env)
     #     endTime = time.perf_counter()
     #     print(f"Time taken: {endTime - startTime} seconds.")        # to measure time
+
+if __name__ == '__main__':
+    lolShell()

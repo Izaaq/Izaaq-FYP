@@ -105,19 +105,19 @@ class ParserLOL(Parser):
        'DIFF_OF expr AN expr',      # -
        'PRODUKT_OF expr AN expr',   # *
        'QUOSHUNT_OF expr AN expr',  # /
-       'MOD_OF expr AN expr',       # %
-       'BIGGR_OF expr AN expr',     # max()
-       'SMALLR_OF expr AN expr')    # min()
+       'MOD_OF expr AN expr')       # %
     def expr(self, p):
         return ('bin_op', p[0], p.expr0, p.expr1)
 
-    @_('BOTH_SAEM expr AN expr',   # ==
-       'DIFFRINT expr AN expr',    # !=
-       'WON_OF expr AN expr',      # xor
-       'BOTH_OF expr AN expr',     # and
-       'EITHER_OF expr AN expr')   # or
+    @_('BOTH_SAEM expr AN expr',    # ==
+       'DIFFRINT expr AN expr',     # !=
+       'WON_OF expr AN expr',       # xor
+       'BOTH_OF expr AN expr',      # and
+       'EITHER_OF expr AN expr',    # or
+       'BIGGR_OF expr AN expr',     # max()
+       'SMALLR_OF expr AN expr')    # min()
     def expr(self, p):
-        return ('equality_check', p[0], p.expr0, p.expr1)
+        return ('comparison_check', p[0], p.expr0, p.expr1)
 
     @_('FLOAT')
     def expr(self, p):

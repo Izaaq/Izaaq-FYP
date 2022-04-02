@@ -59,8 +59,9 @@ class InterpreterLOL:
 
     def walkTree(self, node):
 
+        # untyped data
         if node is None:
-            return None
+            return 'NOOB'
 
         elif node[0] == 'int':
             return node[1]
@@ -82,6 +83,8 @@ class InterpreterLOL:
                     print("WIN", end='')
                 else:
                     print("FAIL", end='')
+            elif toPrint is None:
+                print("NOOB", end='')
             else:
                 print(toPrint, end='')
         elif node[0] == 'printline':
@@ -91,6 +94,8 @@ class InterpreterLOL:
                     print("WIN")
                 else:
                     print("FAIL")
+            elif toPrint is None:
+                print("NOOB")
             else:
                 print(toPrint)
 
@@ -115,21 +120,34 @@ class InterpreterLOL:
                     self.setVariable(node[1], str(self.getVariable(node[1])))
                 except ValueError:
                     raise Exception(f"Cannot convert {node[1]} to string.")
+                except TypeError:
+                    self.setVariable(node[1], "")
             elif node[2] == 'NUMBR':
                 try:
                     self.setVariable(node[1], int(self.getVariable(node[1])))
                 except ValueError:
                     raise Exception(f"Cannot convert identifier '{node[1]}' to integer.")
+                except TypeError:
+                    self.setVariable(node[1], 0)
             elif node[2] == 'NUMBAR':
                 try:
                     self.setVariable(node[1], float(self.getVariable(node[1])))
                 except ValueError:
                     raise Exception(f"Cannot convert identifier '{node[1]}' to float.")
+                except TypeError:
+                    self.setVariable(node[1], 0.0)
             elif node[2] == 'TROOF':
                 try:
                     self.setVariable(node[1], bool(self.getVariable(node[1])))
                 except ValueError:
                     raise Exception(f"Cannot convert identifier '{node[1]}' to boolean.")
+                except TypeError:
+                    self.setVariable(node[1], False)
+            elif node[2] == 'NOOB':
+                try:
+                    self.setVariable(node[1], None)
+                except ValueError:
+                    raise Exception(f"Cannot convert identifier '{node[1]}' to None.")
             else:
                 raise Exception(f"Type '{node[2]}' is not a defined data type.")
 
@@ -219,7 +237,7 @@ class InterpreterLOL:
 
         elif node[0] == 'bin_op':
             if isinstance(self.walkTree(node[2]), str) or isinstance(self.walkTree(node[3]), str):
-                raise Exception("Error - Strings cannot be used")
+                raise Exception("Error - Cannot perform math on strings")
             elif node[1] == 'SUM OF':
                 return self.walkTree(node[2]) + self.walkTree(node[3])
             elif node[1] == 'DIFF OF':
@@ -227,11 +245,15 @@ class InterpreterLOL:
             elif node[1] == 'PRODUKT OF':
                 return self.walkTree(node[2]) * self.walkTree(node[3])
             elif node[1] == 'QUOSHUNT OF':
+                if self.walkTree(node[3]) == 0:
+                    raise Exception(f"Error - Division by zero")
                 return self.walkTree(node[2]) / self.walkTree(node[3])
             elif node[1] == 'MOD OF':
+                if self.walkTree(node[3]) == 0:
+                    raise Exception(f"Error - Division by zero")
                 return self.walkTree(node[2]) % self.walkTree(node[3])
 
-        elif node[0] == 'equality_check':
+        elif node[0] == 'comparison_check':
             if node[1] == 'BOTH SAEM':
                 return self.walkTree(node[2]) == self.walkTree(node[3])
             elif node[1] == 'DIFFRINT':
@@ -242,6 +264,10 @@ class InterpreterLOL:
                 return self.walkTree(node[2]) and self.walkTree(node[3])
             elif node[1] == 'EITHER OF':
                 return self.walkTree(node[2]) or self.walkTree(node[3])
+            elif node[1] == 'BIGGR OF':
+                return max(self.walkTree(node[2]), self.walkTree(node[3]))
+            elif node[1] == 'SMALLR OF':
+                return min(self.walkTree(node[2]), self.walkTree(node[3]))
 
         elif node[0] == 'var':
             return self.getVariable(node[1])
