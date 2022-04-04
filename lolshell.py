@@ -11,7 +11,7 @@ import time
 """
 LOLCODE file reader - file must exist in 'tests' directory and end in '.lol'.
 """
-def lolShell():
+if __name__ == '__main__':
     lexer = LexerLOL()
     parser = ParserLOL()
     env = {}  # context table
@@ -55,6 +55,3 @@ def lolShell():
     #     InterpreterLOL(tree, env)
     #     endTime = time.perf_counter()
     #     print(f"Time taken: {endTime - startTime} seconds.")        # to measure time
-
-if __name__ == '__main__':
-    lolShell()
