@@ -9,7 +9,7 @@ import os
 import time
 
 """
-LOLCODE file reader - file must exist in 'tests' directory and end in '.lol'.
+LOLCODE file reader - file must exist in 'tests' directory and end in '.lol'
 """
 if __name__ == '__main__':
     lexer = LexerLOL()
