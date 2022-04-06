@@ -113,7 +113,6 @@ class InterpreterLOL:
         elif node[0] == 'assign':
             self.setVariable(node[1], self.walkTree(node[2]))
 
-
         elif node[0] == 'convert':
             if node[2] == 'YARN':
                 try:

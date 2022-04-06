@@ -1,7 +1,4 @@
 HAI
-
-BTW Fibonacci - Since functions can't take parameters, it prompts user for an input and uses loop for calculation.
-
 HOW IZ I FIBONACCI
     VISIBLE "Enter index of fibonacci: "!
     GIMMEH PARAM
@@ -12,16 +9,16 @@ HOW IZ I FIBONACCI
     MEBBE BOTH SAEM PARAM AN 1, FOUND YR 1
     OIC
 
-    I HAS A F2 ITZ 0
-    I HAS A F1 ITZ 1
+    I HAS A TEMP1 ITZ 0
+    I HAS A TEMP2 ITZ 1
     I HAS A INDEX ITZ 1
-    I HAS A M
+    I HAS A FIB_NUM
     IM IN YR LOOP UPPIN YR INDEX TIL BOTH SAEM INDEX AN PARAM
-        M R SUM OF F1 AN F2
-        F2 R F1
-        F1 R M
+        FIB_NUM R SUM OF TEMP1 AN TEMP2
+        TEMP1 R TEMP2
+        TEMP2 R FIB_NUM
     IM OUTTA YR LOOP
-    FOUND YR F1
+    FOUND YR FIB_NUM
 IF U SAY SO
 VISIBLE I IZ FIBONACCI MKAY
 KTHXBYE

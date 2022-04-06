@@ -7,12 +7,12 @@ IM IN YR LOOP UPPIN YR COUNTER TIL BOTH SAEM COUNTER AN 100
             BOTH SAEM MOD OF COUNTER AN 5 AN 0
             O RLY?
                 YA RLY
-                    VISIBLE "FIZZBUZZ"
+                    VISIBLE "FizzBuzz"
                 NO WAI
-                    VISIBLE "FIZZ"
+                    VISIBLE "Fizz"
             OIC
         MEBBE BOTH SAEM MOD OF COUNTER AN 5 AN 0
-            VISIBLE "BUZZ"
+            VISIBLE "Buzz"
         NO WAI
             VISIBLE COUNTER
     OIC

@@ -1,7 +1,9 @@
-"""
-LOLCODE shell - To be run for code to work.
-Izaaq bin Ahmad Izham - k19011071
-"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Final Year Project
+# Created by: Izaaq bin Ahmad Izham, k19011071
+# Supervisor: Prof. Laurence Tratt
+
 from lol.lexer import LexerLOL
 from lol.parser import ParserLOL
 from lol.interpreter import InterpreterLOL
@@ -9,15 +11,15 @@ import os
 import time
 
 """
-LOLCODE file reader - file must exist in 'tests' directory and end in '.lol'
+LOLCODE file reader - file must exist in 'programs' directory and end in '.lol'
 """
 if __name__ == '__main__':
     lexer = LexerLOL()
     parser = ParserLOL()
     env = {}  # context table
 
-    # filter out invalid files in 'tests' directory
-    files = os.listdir('tests')
+    # filter out invalid files in 'programs' directory
+    files = os.listdir('programs')
     for file in files[:]:
         if not file.endswith('.lol'):
             files.remove(file)
@@ -33,7 +35,7 @@ if __name__ == '__main__':
             break
 
     try:
-        with open("tests\\" + file) as f:
+        with open("programs\\" + file) as f:
             lines = f.readlines()
     except FileNotFoundError:
         raise Exception("Error - File not found")
@@ -43,6 +45,7 @@ if __name__ == '__main__':
     if lines:
         lex = lexer.tokenize(''.join(lines))
         tree = parser.parse(lex)
+        print(tree)
         InterpreterLOL(tree, env)
         print(env)
 
